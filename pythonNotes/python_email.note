@@ -1,0 +1,26 @@
+1.电子邮件(email)
+    发送email的软件被称为*MUA*(Mail User Agnet)---邮件用户代理
+    email发送出去，到达*MTA*(Mail Transfer Agnet)---邮件传输代理,Email服务提供商，eg.网易，新浪等
+    之后，再由发送人的MTA发送到接收人的MTA.
+    由接收人的MTA再将email投递到邮件的最终目的地*MDA*(Mail Delivery Agent)---邮件投递代理。
+    邮件到到MDA之后，被长期保存在服务器的文件/数据库中。这个地方就是电子邮箱。
+    最后，要收取邮件，要通过MUA从MDA上把邮件取到自己的电脑上。
+    so,email的发送流程为：
+    发件人-> MUA -> MTA -> MTA -> ... -> MTA -> MDA -> <- MUA <-收件人
+
+    本质上，发送和接收邮件就是：
+    1.编写MUA把邮件发送到MTA上
+    2.编写MUA从MDA上收邮件
+2.协议
+    发邮件时，使用的协议就是*SMTP*(Simple Transfer Protocol)
+    收邮件时，可以使用两种协议：
+    *POP*(Post Office Protocol),目前版本是3，所以俗称*POP3*
+    *IMAP*(Internet Message Access Protocol),目前的版本是4，有点是不但能够取邮件，还可以直接操作在MDA上存储的邮件。
+3.MAT服务器地址
+    SMTP协议，服务器地址就是  smtp.xxx.xxx eg. smtp.163.com smpt.qq.com  ,可以在web上搜索某个邮箱的smtp服务器地址
+    POP3协议，服务器地址就是  pop.xxx.xxx  eg. pop.qq.com
+
+4.SMTP发送邮件
+http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/001386832745198026a685614e7462fb57dbf733cc9f3ad000
+
+
