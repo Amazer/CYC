@@ -29,7 +29,7 @@ msg=MIMEText('msg to send','plain','utf-8')
 
 构造发送的消息对象*MIMEText*,第二个参数*plain*表示纯文本，*html*表示网页格式；最后一个参数表示编码格式，为了保证兼容性，用uft-8
 
-发送邮件，使用*smtplib*模块
+:发送邮件，使用*smtplib*模块
 import smtplib
 smtp_server='stmp.xxx.xx' #163邮箱的服务器地址为  stmp.163.com
 smtp_port=25 # SMTP协议端口默认为25
