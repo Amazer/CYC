@@ -22,5 +22,228 @@
 
 4.SMTP发送邮件
 http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/001386832745198026a685614e7462fb57dbf733cc9f3ad000
+Python内置对SMTP支持，可以发送纯文本邮件、HTML邮件以及带附件的邮件
+
+from email.mime.text import MIMEText
+msg=MIMEText('msg to send','plain','utf-8')
+
+构造发送的消息对象*MIMEText*,第二个参数*plain*表示纯文本，*html*表示网页格式；最后一个参数表示编码格式，为了保证兼容性，用uft-8
+
+发送邮件，使用*smtplib*模块
+import smtplib
+smtp_server='stmp.xxx.xx' #163邮箱的服务器地址为  stmp.163.com
+smtp_port=25 # SMTP协议端口默认为25
+server=smtplib.SMTP(smtp_server,smtp_port) #设置服务器地址和端口
+server.set_debuglevel(1) #打印交互信息
+server.login(from_addr,password)    #先登录要发送者邮箱
+server.sendmail(from_addr,[to_address],msg.as_string()) # 收件人可以是多个，所以用list;
+server.quit() # 最终关闭协议
+#有的邮件服务器会判定发送消息是垃圾邮件，因而返回错误码。163邮箱需要填写Subject、From、To,否则会视为垃圾邮件。
+
+发送完整邮件,以及显示邮件主题，发件人和收件人等信息是包含在MTA的发送文本中的（MIMEText中）
+因此，需要把
+邮件主题 Subject
+发件人 From
+收件人 To
+添加到MIMEText中
+# -*- coding: utf-8 -*-
+from email import encoders
+from email.header import Header
+from email.mime.text import MIMEText
+from email.utils import parseaddr, formataddr
+import smtplib
+# 解析名字(可能含有中文,需要Header进行字符串编码)和地址的字符串，并且encode
+def _format_addr(s):
+    name, addr = parseaddr(s)
+    return formataddr(( \
+        Header(name, 'utf-8').encode(), \
+        addr.encode('utf-8') if isinstance(addr, unicode) else addr))
+
+from_addr = raw_input('From: ')
+password = raw_input('Password: ')
+to_addr = raw_input('To: ')
+smtp_server = raw_input('SMTP server: ')
+
+msg = MIMEText('hello, send by Python...', 'plain', 'utf-8')
+msg['From'] = _format_addr(u'发件人显示信息 <%s>' % from_addr) #
+
+# 接收显示的信息是字符串，不是list。如果有多个邮件地址，用,隔开;
+# 收件人的名字根据邮件服务商可能会改变成注册时候的名字
+msg['To'] = _format_addr(u'收件人显示信息 <%s>' % to_addr) 
+msg['Subject'] = Header(u'邮件主题', 'utf-8').encode()
+
+server = smtplib.SMTP(smtp_server, 25)
+server.set_debuglevel(1)
+server.login(from_addr, password)
+server.sendmail(from_addr, [to_addr], msg.as_string())
+server.quit()
+
+发送HTML邮件：
+构造MIMEText的时候，传入'html',邮件内容传入html的格式
+msg=MIMEText('<html><body>...</body></html>','html','utf-8')
+
+发送附件:
+使用*MIMEMultipar*对象，MIMEText为邮件正文对象，MIMEBase为附件对象
+MIMEMultipar.attach(要发送的对象)
+eg.
+
+from email.mime.text import MIMEText
+from email import encoders
+from email.header import Header
+from email.utils import parseaddr, formataddr
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+import smtplib
+# 邮件对象:
+msg = MIMEMultipart()
+msg['From'] = _format_addr(u'Python爱好者 <%s>' % from_addr)
+msg['To'] = _format_addr(u'管理员 <%s>' % to_addr)
+msg['Subject'] = Header(u'来自SMTP的问候……', 'utf-8').encode()
+
+# 邮件正文是MIMEText:
+msg.attach(MIMEText('send with file...', 'plain', 'utf-8'))
+
+# 添加附件就是加上一个MIMEBase，从本地读取一个图片:
+with open('/Users/michael/Downloads/test.png', 'rb') as f:
+    # 设置附件的MIME和文件名，这里是png类型:
+    mime = MIMEBase('image', 'png', filename='test.png')
+    # 加上必要的头信息:
+    mime.add_header('Content-Disposition', 'attachment', filename='test.png')
+    mime.add_header('Content-ID', '<0>') # 内容的id指为0
+    mime.add_header('X-Attachment-Id', '0') #附件的id指为0
+    # 把附件的内容读进来:
+    mime.set_payload(f.read())
+    # 用Base64编码:
+    encoders.encode_base64(mime)
+    # 添加到MIMEMultipart:
+    msg.attach(mime)
+
+发送图片：
+使用html正文，添加图片的时候，使用src="cid:0"，把附件作为图片嵌入。
+如果有多个图片，给附件依次编号，用"cid:x"引用
+msg.attach(MIMEText('<html><body><h1>Hello</h1>' +
+    '<p><img src="cid:0"></p>' +
+    '</body></html>', 'html', 'utf-8'))
+
+同时支持HTML和Plain格式:
+某些浏览器看不了html邮件的时候，可以同时发送一个纯文本。
+如果无法查看html格式的邮件，就会自动降级为查看纯文本邮件
+利用MIMEMultipart,指定subtype为alternative:
+msg = MIMEMultipart('alternative')
+msg['From'] = ...
+msg['To'] = ...
+msg['Subject'] = ...
+
+msg.attach(MIMEText('hello', 'plain', 'utf-8'))
+msg.attach(MIMEText('<html><body><h1>Hello</h1></body></html>', 'html', 'utf-8'))
+# 正常发送msg对象...
+
+加密SMTP:
+标准25端口的SMTP连接是明文传输。
+加密SMTP，先创建ssl安全连接，然后再使用SMTP协议发送邮件。
+eg. Gmail的SMTP端口为587
+smtp_server = 'smtp.gmail.com'
+smtp_port = 587
+server = smtplib.SMTP(smtp_server, smtp_port) 
+server.starttls() #建立安全连接
+# 剩下的代码和前面的一模一样:
+server.set_debuglevel(1)
+...
+
+构造一个邮件对象就是一个Messag对象，
+如果构造一个MIMEText对象，就表示一个文本邮件对象，
+如果构造一个MIMEImage对象，就表示一个作为附件的图片，
+要把多个对象组合起来，就用MIMEMultipart对象，
+而MIMEBase可以表示任何对象。
+它们的继承关系如下：
+Message
++- MIMEBase
+   +- MIMEMultipart
+   +- MIMENonMultipart
+      +- MIMEMessage
+      +- MIMEText
+      +- MIMEImage
+
+email.mime文档：
+https://docs.python.org/2/library/email.mime.html
+
+finally full example:
+#coding: utf-8
+from email.mime.text import MIMEText
+from email import encoders
+from email.header import Header
+from email.utils import parseaddr, formataddr
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+import smtplib
+
+def _format_addr(s):
+    name, addr = parseaddr(s)
+    return formataddr((\
+                       Header(name,'utf-8').encode(),\
+                       addr.encode('utf-8') if isinstance(addr,unicode) else
+                       addr))
 
 
+from_addr = 'xxx@163.com'
+password = 'password'
+
+# smtp_server = 'smtp.163.com'
+# smtp_port=25
+smtp_server = 'smtp.gmail.com'
+smtp_port = 587
+
+to_addr = 'xxx@qq.com'
+
+# 纯文本邮件格式：
+# msg = MIMEText('Cyc Send form 163 mail', 'plain', 'utf-8')
+
+# HTML邮件格式：
+# msg = MIMEText(
+#     '<html><body><h1>Hello</h1>' +
+#     '<p>Cyc Send form 163 mail<a href="http://www.python.org">LearnPython</a>...</p>'
+#     + '</body></html>', 'html', 'utf-8')
+
+# 附件邮件格式：
+# msg = MIMEMultipart()
+msg = MIMEMultipart('alternative')
+# 正文文本
+msg.attach(MIMEText('send with file..', 'plain', 'utf-8'))
+msg.attach(
+    MIMEText('<html><body><h1>LOL MF Head portrait</h1>' +
+             '<p><img src="cid:1"></p>' + '<p><img src="cid:0"></p>' +
+             '</body></html>', 'html', 'utf-8'))
+
+msg['From'] = _format_addr(u'Zuo <%s>' % from_addr)
+msg['To'] = _format_addr(u'Cyc <%s>' % to_addr)
+msg['Subject'] = Header(u'Cyc Weather forecast', 'utf-8').encode()
+
+with open('lolMF.jpg', 'rb') as f:
+    mime = MIMEBase('image', 'jpg', filename='lolMF.jpg')
+    mime.add_header('Content-Disposition', 'attachment', filename='lolMF.jpg')
+    mime.add_header('Content-ID', '<0>')
+    mime.add_header('X-Attachment-ID', '0')
+    # 添加附件
+    mime.set_payload(f.read())
+
+    encoders.encode_base64(mime)
+    msg.attach(mime)
+
+with open('rn.jpg', 'rb') as f:
+    mime = MIMEBase('image', 'jpg', filename='rn.jpg')
+    mime.add_header('Content-Disposition', 'attachment', filename='rn.jpg')
+    mime.add_header('Content-ID', '<1>')
+    mime.add_header('X-Attachment-ID', '1')
+    # 添加附件
+    mime.set_payload(f.read())
+
+    encoders.encode_base64(mime)
+    msg.attach(mime)
+
+server = smtplib.SMTP(smtp_server, smtp_port)
+# smtp加密:
+server.starttls()
+server.set_debuglevel(1)
+server.login(from_addr, password)
+server.sendmail(from_addr, [to_addr], msg.as_string())
+server.quit()
