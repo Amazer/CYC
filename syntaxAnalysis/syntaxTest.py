@@ -12,12 +12,13 @@ Include_file_list = []
 re_compare_include = re.compile(
     r'\s*(#include)\s+\"([_a-zA-Z0-9]+[_a-zA-Z0-9\.]*)\"')
 
+re_compare_struct_define= re.compile(r'([_a-zA-Z0-9]+)\s+([_a-zA-Z0-9]+)\s*;')
 
 def StartParse():
     with open(Test_file_full_path, 'r') as f:
-        #         StructParse(f)
-        #         print Struct_define_Dict
-        IncludeParse(f)
+        StructParse(f)
+        print Struct_define_Dict
+#         IncludeParse(f)
 
 
 def StructParse(f):
@@ -38,8 +39,7 @@ def StructParse(f):
 
 #                 print '--- curStructName end \n cur line:%s' % content
             else:
-                matchRes = re.match(r'([_a-zA-Z0-9]+)\s+([_a-zA-Z0-9]+)\s*;',
-                                    content)
+                matchRes = re_compare_struct_define.match(content)
                 if matchRes != None and Struct_define_Dict.has_key(
                         curStructName):
                     var = matchRes.group(2)
