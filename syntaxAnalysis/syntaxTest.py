@@ -57,7 +57,20 @@ def IncludeParse(f):
                 Include_file_list.append(fileName)
             print 'find include: %s' % fileName
 
+def MatchVarDefine(var,line):
+    comStr=r'.*?([_a-zA-Z]+[_a-zA-Z0-9]*)\s+'+var+'.*'
+#     re_compare_var_define=re.compile(comStr)
+    matchRes=re.match(comStr,line)
+    if matchRes==None:
+        print 'not match'
+        return None
+    else:
+        res=matchRes.group(1)
+#         print matchRes.groups()
+#         print res
+        return res
 
-StartParse()
+# StartParse()
 # print re.match(r'}','};')
 # print re_compare_include.match('#include \"UnityCG.cgine\"').groups()
+MatchVarDefine('s','inline fixed4 LightingSelfLambert (SurfaceOutput s, fixed3 lightDir, half3 viewDir, fixed atten)')
