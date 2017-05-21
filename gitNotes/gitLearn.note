@@ -12,6 +12,38 @@
     .git目录用于跟踪版本管理
     使用ls -ah 可以查看隐藏的目录
 3.命令
-    1.git add filename 添加到git仓库
+    1.git add filename 添加到git仓库,可以多次使用，添加多个文件
+    提交文件修改的时候，也需要运行add命令
     2.git commit -m "comment" 提交到仓库。会一次行提交很多文件
-    3.
+    3.git status 查看仓库当前状态(和版本库对比的状态)
+    4.git diff 查看不同(本地和版本库对比的不同)
+        git diff commit_id -- filename 查看版本库中和工作区中的区别
+        eg.
+        git diff HEAD -- readme.txt
+4.版本回退
+    1.git log 查看版本的log
+        git log --pretty=oneline 一行显示log
+    2.HEAD表示当前版本，HEAD^表示上个版本，HEAD^^表示上上个版本，以此类推. HEAD~100表示上100个版本.
+    3.git reset --hard HEAD^[commit_id]　表示版本回退到哪个版本
+        HEAD指针指向哪个版本
+    4.git reflog 记录每一次的命令。如果回退到某个版本后，后悔了，又想回到最新的版本，使用reflog查看log，查找commit id.
+        commit_id 形如:HEAD@{X}
+5.工作区和暂存区
+    本地仓库目录，是工作区，
+    .git目录是版本库，其中有暂存区（stage或者index),和git自动创建的第一个分支master,以及指向master的一个指针叫HEAD. 
+    git add 将文件添加到暂存区
+    git commit 提交更改将暂存区内容提交到当前分支
+6.git管理的是修改而不是文件
+    每add一次，其实是将修改放入暂存区
+    每commit一次，是将暂存区的内容同步到版本库
+    因此
+        修改１
+        add
+        修改２
+        commit
+    修改2的东西并不会提交到版本库，因为没有加入到暂存区中
+7.git checkout -- filename 撤销修改
+    如果本地修改还没有放入暂存区，本地会撤销为和版本库一模一样
+    如果本地修改已经add到暂存区，会撤销add
+    !! --　很重要，如果没有--，命令会变为“切换到另一个分支”
+8.删除文件
