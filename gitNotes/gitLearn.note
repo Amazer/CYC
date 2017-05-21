@@ -1,0 +1,17 @@
+0.git是分布式版本控制系统
+1.config:
+    git config --global user.name "you name"
+    git config --global user.email "email@example.com"
+    --global :用了这个参数，表示机器上所有的git仓库都会使用这个配置
+2.创建仓库
+    repository:版本库　仓库
+    目录里的文件都被git管理起来
+    １.创建一个空目录
+    ２.运行 git init,将目录变成git可以管理的仓库
+    (pwd 查看当前目录)
+    .git目录用于跟踪版本管理
+    使用ls -ah 可以查看隐藏的目录
+3.命令
+    1.git add filename 添加到git仓库
+    2.git commit -m "comment" 提交到仓库。会一次行提交很多文件
+    3.
