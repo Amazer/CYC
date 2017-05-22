@@ -47,3 +47,33 @@
     如果本地修改已经add到暂存区，会撤销add
     !! --　很重要，如果没有--，命令会变为“切换到另一个分支”
 8.删除文件
+    rm filename         在文件管理器中删除文件
+    git rm -- filename  将删除修改提交到暂存区
+    git commit -m 'xx'  将修改提交到版本库
+
+    rm filename
+    git checkout --filename 恢复上一次的命令/删除操作。(or 从版本库中迁出文件)
+9.远程仓库
+    1.检查是否已经有ssh key了:
+        在用户主目录下，查看是否有.ssh目录，如果有，查看目录下是否有id_rsa和id_rsa.pub文件
+        如果没有，创建ssh key:
+        ssh-keygen -t rsa -C 'youremail@example.com'
+        id_rsa为私钥，id_rsa.pub为公钥
+    2.github配置
+        登录github->Account settings->ssh keys
+        ->add ssh key   填写任意title ,在文本框里粘贴id_rsa.pub文件内容
+        ->add key
+10.添加远程仓库    
+    1.登录github->create a new repo
+    2.可以从这个仓库克隆新的仓库，也可以吧一个已有的本地仓库与之关联，然后吧本地仓库的内容推送到github仓库
+    在本地仓库下运行命令,添加远程库名字为origin：
+    git remote add origin git@github.com:YourName/yourRepo.git
+    第一次把本地库的所有内容推送到远程库上：
+    git push -u origin master
+    git push -u <本地库> <远程库>
+    -u参数:git不但会把本地的master分支内容推送到远程新的master分支，还会把本地的master分支和远程的master分支关联起来
+    以后推送命令：
+    git push origin master
+
+
+        
