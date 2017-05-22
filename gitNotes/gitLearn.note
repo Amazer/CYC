@@ -83,4 +83,206 @@
     git clone https://github.com/UserName/UserRepo.git
 12.分支管理
     git切换分支快，灵活。
+    因为管理的是修改，版本也都是指针指向，所以，切换分支什么的，只要修改指针指向就可以了。删除分支也是删除了一个指针。
+    1.创建分支
+    git checkout -b dev<分支名> 相当于两条命令：
+        git branch dev
+        git checkout dev
+    2.git branch 查看当前所有分支
+    3.切换分支
+        git branch <分支名> 切换到分支
+    4.合并分支
+        git merge 合并指定分支到 当前分支 
+    5.删除分支：
+        git branch -d <分支名> 删除分支
+    6.解决冲突
+        自动和并的时候，如果有冲突，打开冲突文件，编辑解决冲突后，对冲突文件进行
+        add & commit 操作。
+    : git log --graph 命令可以看到分支合并图
+13.分支管理策略
+    通常merge分支时，如果可能，git会用Fast forward模式。但在这种模式下，删除分支后，会丢掉分支信息.
+    如果要强制禁止用Fast
+    forward模式，git就会在merge时生成一个新的commit.这样，从分支历史上就可以看出分支信息.
+    --no-ff  强制禁止使用Fast forward模式
+    git merge --no-ff -m "comment" <分支名>
+    git log --graph --pretty=oneline --abbrev-commit (显示提交信息？)
+    :合并分支时加上--no-ff参数，合并后有历史分支，否则fast
+    forward合并看不出来曾经做过合并
+    分支策略：
+    0.使用--no-ff 非fast forward模式
+    1.master作为最稳定的版本，仅用来发布新版本，平时不在上面干活
+    2.dev分支作为不稳定的开发版。需要的时候，将dev分支合并到master上。
+14.Bug分支
+    修复每一个bug的时候，都可以通过一个临时的分支来修复
+    情景：
+    接到一个修复代号为101的bug,想创建一个分支issuse-101来修复它。但是，当前正在dev上进行的工作还没有提交。工作只做了一半。（dev有修改，没有提交）
+    将使用的命令：
+    git stash
+    把当前工作现场“储藏”起来。当前的工作区就是干净的了，没有修改未提交的东西
+    git stash list 查看工作现场列表
+    git stash apply <stash_id>恢复现场，但是stash内容并不删除，需要使用git stash drop删除
+    git stash drop <stash_id> 删除现场
+    git stash pop 恢复上一次的现场，并且删除stash内容
+    解决步骤：
+    1.当前分支 使用
+        git stash
+    保存现场
+    2.切换到需要进行修改的分支,创建一个issuse分支
+        git checkout <branch_id>
+        git checkout -b issue-id
+        此时，在issuse-id分支上
+    3.修改完成bug后，切换到branch_id,并且进行合并，删除issuse-id分支
+    4.回到dev分支,并恢复现场
+        git checkout <dev_id>
+        git stash pop
+15.Feature分支
+    为了避免添加新功能的时候，一些实验性的代码把主分支搞乱，所以，每添加一个新功能，最好能建一个新feature分支。开发完feature之后，合并，最后删除掉。 
+    如果没有合并过的分支，是不可以被删除的。
+    强制删除没有合并的分支：
+    git branch -D <branch_id>
+16.多人协作
+   当从远程仓库克隆时，git自动会把本地的master分支和远程的master分支对应起来，并且，远程仓库的默认名字是origin 
+    1.git remote  查看远程库信息
+    git remote -v   显示更详细的信息
+    ....(fetch)         可以抓取的地址
+    ....(push)          可以推送的地址
+    2.推送分支
+    git push origin <push_addr>   可以选择推送到哪个分支
+    :master分支作为主干分支，时刻与远程同步
+    :dev分支作为开发分支，所有成员都需要在上面工作，也需要与远程同步
+    :bug分支只用于本地修复bug,没必要推送到远程，除非有要求，要看
+    :feature分支是否推送到远程，取决于是否需要协作开发
+    3.抓取分支 git pull
+    情景：
+        远程有master和dev两个分支，多人协作的时候，大家会向这里推送各自的修改。
+        但是，远程clone下来的，只能看到master分支.可以在本地使用git branch命令查看
+        创建本地dev，与远程dev链接：
+        git checkout -b dev origin/dev   创建了与远程dev的链接
+        如果，在本地dev抓取(git pull)的时候失败,原因是没有指定本地dev分支与远程origin/dev分支链接，使用
+        git branch --set-upstream dev origin/dev
+        将本地dev和远程dev链接
 
+    总结：
+    多人协作工作模式通常是这样：
+        1.首先，可以试图用
+            git push origin branch_name 推送自己的修改
+        2.如果推送失败，则因为远程分支比本地的更新，需要先用
+            git pull        试图合并
+        3.如果合并有冲突，则解决冲突，并在本地提交
+        4.最后，用
+            git push origin branch_name 推送
+        note:
+            如果git pull 提示 "no tracking
+            information"，则说明本地分支和远程分支的连接关系没有创建，用命令
+            git branch --set-upstream branch_name origin/branch-name 进行关联.
+17.标签管理
+    发布版本是，通常在版本库中打一个标签(tag)，这样，就唯一确定了打标签时刻的版本。将来无论什么时候，取某个标签的版本，就是把那个打标签的时刻的历史版本取出来。
+    标签是版本库的一个快照。指向某个commit的指针。和head移动到某个commit一样。
+    优势是，commit_id是一串数字，而tag 是一个和commit一起提交发可读标记。
+    1.创建标签
+    git tag <tag_name>  创建的一个新标签
+    2.查看所有标签
+    git tag
+    3.为某次commit创建标签
+    默认标签是创建在最新提交的commit上的。
+    如果需要为某一此的提交创建：
+    git log --pretty=oneline --abbrev-commit  先查看提交list
+    git tag <tag_name> commit_id        为某个commit打标签
+    4.查看标签信息
+    标签不是按时间顺序列出的，而是按字母排序的。
+    git show <tag_name>  查看标签信息
+    5.创建带说明的标签
+    用-a指定标签名
+    用-m指定说明文字
+    eg.
+        git tag -a v0.1 -m "version 0.1 released " 3628164
+    用-s通过私钥签名一个标签
+    eg. git tag -s v0.2 -m "signed version 0.2 released" fec145a
+    签名采用PGP,因此，必须要首先安装gpg(GnuPG).如果没有安装，会报错。
+    配置PGP请看文档
+    6.删除标签
+    git tag -d <tag_name>
+    7.推送标签
+    git push origin <tag_name>
+    git push origin --tags      将推送所有尚未推送的本地标签
+    8.删除远程标签
+        1.先从本地删除
+        git tag -d <tag_name>
+        2.从远程删除
+        git push origin :refs/tags/<tag_name>
+18.使用GitHub
+    可以任意Fork开源仓库
+    自己拥有Fork后的仓库的读写权限
+    推送pull request给官方仓库
+19.自定义Git
+    1.git配置：
+        1.显示颜色
+        git confit --global color.ui true
+        2.忽略特殊文件
+            1.在git工作的根目录下创建一个特殊的.gitignore文件,注意不是文件夹
+            2.把要忽略的文件名填进去
+                使用git check-ignore命令检测忽略规则
+                eg. git check-ignore -v app.class
+            3.把.gitignore文件也提交到git
+        3.强制添加一个文件到git
+        git add -f filename
+        不需要从头写.gitignore文件，GitHub已经为我们准备了各种配置文件，只需要组合一下就可以使用了。所有配置文件可以直接在线浏览：https://github.com/github/gitignore
+        忽略文件的原则是：
+        1.忽略操作系统自动生成的文件，比如缩略图
+        2.忽略编译生成的中间文件、可执行文件等
+        3.忽略自己的带有敏感信息的配置文件
+    2.配置别名
+    为命令配置快捷键
+    git config --global alias.st status   创建status的别名，叫做st
+    git config --global alias.co checkout
+    git config --global alias.ci commit
+    git config --global alias.br branch
+    git config --global alias.unstate 'reset HEAD'  为reset HEAD创建一个unstate的别名
+    git config --global alias.last 'log -l' 为git last创建别名，显示最后一次提交信息
+    git config --global alias.lg "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+
+    3.配置文件
+    config加上--global,针对当前电脑下的所有git起作用
+    如果不加，就只针对当前仓库起作用
+    每个仓库的配置文件放在.git/config文件中
+    当前用户个git配置放在用户主目录下的.gitconfig中
+    cat .git/config
+    [alias] 后面可以添加
+    eg.
+    [alias]
+        last = log -l
+    [user]
+        name = YourName
+        email = your@email.com
+20.搭建Git服务器
+    1.搭建git服务器
+        准备：
+        Linux机器
+        步骤：
+        1.安装git
+        sudo apt-get install git
+        2.创建git用户，用来运行git服务
+        sudo adduser git
+        3.创建证书登录
+        收集所有需要登录的用户的公钥（id_rsa.pub)文件，把所有公钥导入到
+        /home/git/.ssh/authorized_keys文件里，一行一个
+        4.初始化git仓库
+        sudo git init --bare <repoName>.git
+        git创建了一个裸仓库，没有工作区。因为服务器上的git仓库纯粹是为了共享，所以不让用户直接登录到服务器上改工作区，并且服务器上的git仓库通常以.git结尾
+        修改owner为git:
+        sudo chown -R git:git <repoName>.git
+        5.禁用shell登录
+        处于安全考虑，第二部创建了git用户，不允许登录shell
+        可以通过编辑/etc/passwd文件完成。找到：
+        git:x:1001:1001:,,,:/home/git:/bin/bash
+        改为：
+        git:x:1001:1001:,,,:/home/git:/usr/bin/git-shell
+        这样，用户可以通过ssh使用git，但是无法登录shell。因为我们为git用户指定的git-shell每一次登录就自动退出。
+        6.克隆远程仓库，在各自电脑上运行
+        git clone git@server:/src/<repoName>.git
+    2.管理公钥
+    收集公钥添加到文件中对于几百人的团队就太麻烦了。
+    可以使用Gitosis来管理公钥。自己查找教程
+    3.管理权限
+    git支持钩子（hook），所以，可以在服务器端编写一系列街霸来控制提交等操作
+    Gitolite工具可以达到这个目的。自己查找教程
