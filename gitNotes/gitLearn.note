@@ -82,4 +82,5 @@
     git clone git@github.com:UserName/UserRepo.git
     git clone https://github.com/UserName/UserRepo.git
 12.分支管理
-    git切换分支快。
+    git切换分支快，灵活。
+
