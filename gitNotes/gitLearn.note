@@ -63,7 +63,7 @@
         登录github->Account settings->ssh keys
         ->add ssh key   填写任意title ,在文本框里粘贴id_rsa.pub文件内容
         ->add key
-10.添加远程仓库    
+10.添加远程仓库,现有本地库，然后和远程库关联    
     1.登录github->create a new repo
     2.可以从这个仓库克隆新的仓库，也可以吧一个已有的本地仓库与之关联，然后吧本地仓库的内容推送到github仓库
     在本地仓库下运行命令,添加远程库名字为origin：
@@ -74,6 +74,12 @@
     -u参数:git不但会把本地的master分支内容推送到远程新的master分支，还会把本地的master分支和远程的master分支关联起来
     以后推送命令：
     git push origin master
-
-
-        
+11.克隆远程仓库
+    git clone url logalDir
+    其中，url git://使用ssh，也可以使用https://
+    使用https的麻烦是，每次推送都必须输入口令。在某些只开放http协议的公司内部，无法使用ssh,只能用https
+    使用ssh支持的原生git协议的速度最快
+    git clone git@github.com:UserName/UserRepo.git
+    git clone https://github.com/UserName/UserRepo.git
+12.分支管理
+    git切换分支快。
