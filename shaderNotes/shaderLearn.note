@@ -1,0 +1,20 @@
+1.*Shader Reference*
+    *surface sharders*
+    *vertex and fragment shaders*
+    *fixed function shaders*
+2.ShaderLab
+
+    Transform,TexGen,Lighting                                       Texturing Fog
+                                ------>  Culling DepthText  ----->                  ----->  Alpha Test ------> Blending
+    Vertex Shader                                                   Fragment Shader 
+
+3.图形硬件流水线
+            顶点连接信息
+        -------------------------
+                                |
+                                ↓         片段                   着色片段
+    ---> 顶点变换   --->   图元装配和光栅化 ---> 片段纹理映射和着色 ---> 光栅化操作 --->
+     顶点         被变换的顶点  |                                           ↑
+                                ↓                                           |
+                                ---------------------------------------------
+                                
