@@ -2,13 +2,67 @@
     *surface sharders*
     *vertex and fragment shaders*
     *fixed function shaders*
-2.ShaderLab
+2.流程图
+
+    1.shaderlab 
 
     Transform,TexGen,Lighting                                       Texturing Fog
                                 ------>  Culling DepthText  ----->                  ----->  Alpha Test ------> Blending
     Vertex Shader                                                   Fragment Shader 
 
-3.图形硬件流水线
+    2.图形硬件流水线
+
+                顶点连接信息
+            -------------------------
+                                    |                           (Colored Fragments)
+                                    ↓         片段                   着色片段
+        ---> 顶点变换   --->   图元装配和光栅化 ---> 片段纹理映射和着色 ---> *光栅化操作* --->
+         顶点         被变换的顶点  |                                           ↑           更新像素
+      (Vertices)                    ↓                                           |
+                                    ---------------------------------------------
+
+    3.光栅化操作
+
+                                                    (Scissor Test)    (Alpha Test)   (Stencil Test)    (Depth Test)          (Blending)  (Dithering)    (Logic Op)        (Color Buffer)
+        片段和与之相关联的数据  --→ 像素所有权测试  --→ 裁剪测试    --→ alpha测试   --→ 模板测试    --→   深度测试   --------→ 混合   --→ 抖动显示    --→ 逻辑操作    --→ 颜色缓冲区
+                                                                                          |                |   |                 ↑                                               |
+                                                                                          |      模板      |   |                 |                                               |
+                                                                                          ---→  缓冲区  ←---   --→深度缓冲区      -------------------------------------------------
+                                                                                            (Stencil Buffer)   (Depth Buffer)
+    4.可编程图形流水线(The Programmable Graphics Pipeline)
+
+                  3D应用程序或游戏
+                        |
+            3D API      |
+           Commands     |
+                        ↓
+                    3D API:
+                OpenGL或Direct3D
+                        |                                       CPU-GPU Boundary
+        ================|==============================================================================================================================================================================
+                        |
+           GPU Command  |                                                           Assembled Polygons
+          & DataStream  |               Vertex Index Stream                             ,Lines&Points                                   Pixel Location Stream                Pixel Updates
+                        |                  (顶点索引流)                           (装配后的多边形、线段和点)                                (像素位置流)                       (像素更新)
+                        ↓
+                 GPU Front End  ------------------------→ Pirmitive Assembly --------------------------------→ Resterization&Interpolation -----------------→ Raster Operations ---------→ Frame Buffer
+                 (GPU 前端)                                 (图元装配)                                             (光栅化和插值)                              (光栅化操作)                 (帧缓冲)
+                       |                                        ↑                                                         |                                         ↑
+    Pretransformed     |                                        |   Transformed                Rasterized Pretransformed  |                                         | Transformed Fragments
+      Vertices         |                                        |     Vertices                      Fragments             |                                         |    (变化后的片段)
+    (变换前的顶点)     |                                        |  (变换后的顶点)                (光栅化的变化前的片段)   |                                         |
+                       |                                        |                                                         |                                         |
+                       -----→ Programmable Vertex Processor -----                                                         ------→ Programmable Fragment Processor ---
+                                (可编程顶点处理器)
+
+3.固定管线和可编程流水管线
+
+
+*<Cg教程>*                                
+1.图形硬件流水线
+    一个流水线是一序列可以并行和按照固定顺序进行的阶段。
+    每个阶段都从它的前一阶段接收输入，然后把输出发给随后的阶段。
+
             顶点连接信息
         -------------------------
                                 |
@@ -17,4 +71,500 @@
      顶点         被变换的顶点  |                                           ↑
                                 ↓                                           |
                                 ---------------------------------------------
-                                
+    顶点(vertex)信息:
+        位置                                position
+        颜色                                color
+        第二(反射)颜色  
+        纹理坐标集(一个或多个)
+        法向量                              normal
+    1.顶点变换
+        模型顶点位置变化到屏幕位置（以便光栅器使用）
+        为贴图产生纹理坐标
+        照亮顶点以决定顶点的颜色(?和光照有关)
+    2.图元装配和光栅化
+        图元装配阶段：
+            将顶点装配为几何图元:根据伴随顶点序列的几何图元分类信息把顶点装配成几何图元
+            输入：
+                顶点序列
+            过程：
+                图元装配: 产生一序列的 三角形、线段和点
+                    几何图元的类型：
+                        点,独立的线段,循环线段,线段带
+                        独立的三角形,三角带，三角扇
+                        独立的四边形，四边形带，多边形
+                裁剪:经过裁剪到可是*平截体*和任何有效的应用程序制定的*裁剪平面*
+                culling(挑选):*光栅器*根据多边形的朝前或朝后来丢弃一些多边形。
+            输出：
+                多边形
+
+        光栅化：
+            决定哪些像素被几何图元覆盖的过程。
+            多边形、线段和点根据每种图元指定的规则分别被光栅化。
+            光栅化的结果是像素位置的集合和片段的集合
+            输入：
+                经过裁剪和culling的多边形
+            过程：
+                光栅化测试
+            输出：
+                像素位置的集合和片段的集合
+            光栅化后，一个图元拥有的顶点数目和产生的片段之间没有任何关系。(顶点数和到了屏幕上的片段，没有关系)
+        像素：图像元素的简称。代表帧缓存这种某个指定位置的内容。（eg.颜色，深度和其他与之歌位置相关联的值）
+        片段(Fragment):一个片段是更新一个特定像素前在需要的一个状态.
+            像素位置、深度值、
+            经过插值的参数:颜色、第二（反射）颜色，一个或多个纹理坐标集
+    3.插值、贴图和着色
+       一个图元被光栅化成为片段的时候，如果片段属性需要，才进行插值、贴图和着色阶段.
+       除了确定片段的最终颜色，这个阶段还新确定一个深度，或者甚至丢弃这个片段以避免更新帧缓存对应的像素。
+       允许这个阶段可能丢弃片段，这个阶段为它接收到的每个输入片段产生一个或不产生着色过的片段。
+       1.为片段：插值、着色（颜色）、产生深度
+       2.丢弃片段
+    4.光栅操作
+        在最后更新帧缓存之前。执行最后一系列的针对每个片段的操作。
+        此阶段：
+            深度测试：消除隐藏面
+            混合(blend):
+            模板(stencil)：
+            阴影:
+        光栅操作阶段将根据许多测试来检测每个片段：
+            裁剪：
+            alpha:
+            模板：
+            深度测试：
+        如果任意一项测试失败了，片段就会在这个阶段被丢弃,而更新像素的颜色纸（虽然一个模板写入的操作也许会发生）。
+        通过了深度测试，就可以用片段的深度值代替像素的深度值了。
+        在测试之后，混合操作将把片段的最后颜色和对应的像素的颜色结合在一起。
+
+
+        片段和与之相关联的数据  --→ 像素所有权测试  --→ 裁剪测试    --→ alpha测试   --→ 模板测试    --→ 深度测试    --------→ 混合    --→ 抖动显示    --→ 逻辑操作    --→ 颜色缓冲区
+                                                                                          |                |  |                 ↑                                               |
+                                                                                          |      模板      |  |                 |                                               |
+                                                                                          ---→  缓冲区  ←---  --深度缓冲区      -------------------------------------------------
+                                                                                          
+
+2.可编程图形流水线(The Programmable Graphics Pipeline)
+
+                  3D应用程序或游戏
+                        |
+            3D API      |
+           Commands     |
+                        ↓
+                    3D API:
+                OpenGL或Direct3D
+                        |                                       CPU-GPU Boundary
+        ================|==============================================================================================================================================================================
+                        |
+           GPU Command  |                                                           Assembled Polygons
+          & DataStream  |               Vertex Index Stream                             ,Lines&Points                                   Pixel Location Stream                Pixel Updates
+                        |                  (顶点索引流)                           (装配后的多边形、线段和点)                                (像素位置流)                       (像素更新)
+                        ↓
+                 GPU Front End  ------------------------→ Pirmitive Assembly --------------------------------→ Resterization&Interpolation -----------------→ Raster Operations ---------→ Frame Buffer
+                 (GPU 前端)                                 (图元装配)                                             (光栅化和插值)                              (光栅化操作)                 (帧缓冲)
+                       |                                        ↑                                                         |                                         ↑
+    Pretransformed     |                                        |   Transformed                Rasterized Pretransformed  |                                         | Transformed Fragments
+      Vertices         |                                        |     Vertices                      Fragments             |                                         |    (变化后的片段)
+    (变换前的顶点)     |                                        |  (变换后的顶点)                (光栅化的变化前的片段)   |                                         |
+                       |                                        |                                                         |                                         |
+                       -----→ Programmable Vertex Processor -----                                                         ------→ Programmable Fragment Processor ---
+                                (可编程顶点处理器)
+3.光照和光照模型
+    .光照和一个物体的材质特性一起决定了物体的外观
+    .光照模型根据光和物体的特征，描述了光和物体之间的相互作用和影响
+    .基本的光照模型：
+                      光照      放射光  (Emissive) (自发光)
+        物体表面颜色 ------→ {  环境反射(Ambient)
+                      材质      漫反射  (Diffuse)
+                                镜面反射(Specular)
+        SurfaceColor=Emission + Ambient + Diffuse + Specular
+        1.放射光 Emissive
+            由物体表面发出的光，不影响其他物体
+            模拟炽热物体
+            计算完其他所有光照后，添加此颜色
+            Emissive=Ke (Ke为材质的放射光颜色)
+        2.环境反射 Ambient
+            不依赖与光源的位置，来自四面八方
+            受全局环境光的影响
+            SurfaceColor的Ambient项依赖于材质的反射能力和环境光的颜色
+            Ambient=Ka*GlobalAmbient    (Ka为材质环境光反射系数，GlobalAmbient为入射环境光的颜色)
+        3.漫反射 Diffuse
+            Diffuse=Kd*lightColor*max(N·L,0)
+            Kd:材质的漫反射颜色
+            lightColor:入射漫反射光的颜色
+            N:单位表面法向量
+            L:单位指向光源的向量
+            P:被着色的点
+        4.镜面反射 Specular
+            依赖于观察者的位置，得能接收到反射光线
+            受光源、材质的镜面反射性质和表面光泽度的影响
+            （越由光泽的材质高光区越小，较少光泽的材质高光区越分散的开）
+            Specular=Ks*lightColor*facing*pow((max(N·H),0),shininess)
+            Ks:材质的镜面反射颜色
+            lightColor:入射镜面反射光的颜色
+            N:单位表面法向量
+            V:视点的单位向量
+            L:光源方向的单位向量
+            H:V和L的中间向量的单位向量  H=(V+L)*0.5
+            P:要着色的点
+            facing:若N·H>0，则为1；否则为0
+                （朝向。是否与Normal朝向相同，同方向才有作用。也就是漫反射光是否大于0，没有漫反射，自然也就没有镜面反射）
+    .对光照模型的简化：
+        所有光源共用一个全局环境颜色
+        漫反射光和镜面反射光使用同一个颜色
+        没有引入衰减或聚光灯效果
+4.扩展光照模型
+    1.距离衰减
+        AttenuationFactor=1/(Kc+Kld+Kqd²)
+        d：到光源的距离
+        Kc,Kl,kq:控制衰减的常量
+        常数项，一次系数，二次系数
+        模拟真实世界中，一个点光源的强度以1/(d²)衰减，更多参数，更多控制
+        衰减因子用于调整漫反射和镜面反射项
+        lighting=Emission+Ambient+AttenuationFactor*(Diffuse+Specular)
+    2.聚光灯效果
+        (p123)
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+*<Untiy3d ShaderLab>*
+1.Shader结构
+    Shader，定义文件名
+
+    Shader "ShaderName"
+    {
+        Properties
+        {
+        }
+        SubShader
+        {
+            Tags { "Queue"="Geometry" "RenderType"="Opaque" "IgnoreProjector"="True"}
+            Pass
+            {
+                Name "PASS_NAME"  //可以被其他Shader引用,必须大写
+                //eg.
+                //UsePass "ShaderName/PASS_NAME"
+            }
+            Pass{}
+            ...
+        }
+        SubShader
+        {
+        }
+        ...
+        FallBack "Default Shader Name"
+    }
+    1.SubShader用于编写不同显卡的处理 
+        SubShader包装了一个渲染方案，而这个渲染方案是由一个个Pass块执行的。
+        如果只有一个Pass,可以省略，写在SubShader块中
+    2.SubShader的重要标签 Tags{}块
+        Queue:
+            Background      1000
+            Geometry        2000
+            AlphaTest       2450
+            Transparent     3000
+            Overlay         4000
+        RenderType:
+            Opaque
+            Transparent
+            TransparentCutout
+            Background
+            Overlay
+            在替代渲染（Placement)做Post Effects时很重要，Unity内置的Image Effects根据它来决定如何替代渲染
+            此外，如果相得到场景的一张ZDepth和Normals的快照，也需要一个正确的RenderType
+        IgnoreProjector:
+            True       当前物体忽略Projector的影响
+            False
+
+        自定义标签：
+            eg. "MyTag"="Lucifer" 一般在替代渲染时用到（用于区分类别）
+    3.SubShader中的 Pass{}块
+        Pass中包含了渲染一个集合体的具体代码
+        Pass块中的标签都是针对*渲染路径*的，告诉渲染引擎这个Pass在什么渲染路径下被渲染。
+        Name 用于定义Pass的名字，以便别的shader可以引用，必须大写
+        UsePass 用于引用Pass,路径为 shaderName/PASS_NAME
+    4.FallBack保证Shader的广泛适用性
+        如果用户所有的SubShader都失败了，为了在用户计算机上呈现设置的机制，使用FallBack指定所用的Shader。
+2.ShaderLab支持的语言
+    1.使用GLSL写Shader逻辑
+        代码必须位于GLSLPROGRAM和ENDGLSH关键字之间
+    2.使用Cg/HLSL
+        代码必须位于CGPROGRAM和ENDCG关键字之间
+3.Unity3d中Shader的3中形态
+    1.固定管线 (Fixed Pipeline)
+        应对老一代GPU，没有可编程流水管线的情况下使用。
+        固定管线的形态和语法和NVIDIA的CgFX以及微软的FX文件比较类似。
+        固定管线的相关代码都必须处于一个Pass块中。
+    2.可编程Shader
+        在Pass块中，编写顶点和片段程序
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert     //声明vertext Shader的函数为 vert
+            #pragma fragment frag   //声明fragment Shader的函数为 frag
+            #include "UnityCG.cginc"    //引用外部文件
+            ...vert(...){}
+            ...frag(...){}
+            ENDCG
+        }
+        除此之外，还可以使用一些指令告诉Unity如何具体地编译Shader:
+        1.#pragma target 2.0 
+        :编译目标2.0，相当于Direct3D的Shader Model 2.0
+        :对应与OpenGL下的
+            256条ARB_vertex_shader的指令，
+            32条ARB_fragment_shader的texture指令和
+            64条普通指令，
+            16个寄存器和
+            4个贴图
+
+        2.#pragma target 3.0  
+        :编译目标3.0，相当于Direct3D的Shader Model 3.0
+        :对应与OpenGL下的
+            ARB_vertex_shader没有指令书目限制
+            512条ARB_fragment_shader的texture指令和
+            512条普通指令，
+            32个寄存器和
+            4个贴图
+        3.对于面向OpenGL接口的情况，还可以使用
+                #pragma profileoption MaxTexIndirection=256
+            这样的指令。
+            当编译平台为独立的可执行桌面OpenGL程序时，可以使用
+                #pragma glsl
+            把Cg代码转换为GLSL代码，从而绕过在Shader Model 3.0中的一些指令限制
+        4.使用#pragma fragmentoption option来限制编译出的fragment函数
+        5.#pragma glsl_no_auto_normalization
+            对于移动平台GLSL,例如Android和IOS,用此来关闭vertex函数中对法线和且想了的自动单位化处理
+        6.限制编译平台
+            #pragma only_renderersd3d9 gles
+            #pragma exclude_renderers xbox360
+            适应于这两条指定的值有：d3d9,d3dll,opengl,gles(移动平台的OpenGL),xbox360,p3(任天堂的PlayStation),flash
+    3.Surface Shader
+        Unity通过Surface Shader把一些复杂性包装了起来，包括：
+        处理不同的照明、点光源、平行光、光照贴图等
+        处理不同的阴影选项
+        在Unity的两个渲染路径(Forward和Deferred)下正常工作
+
+        1.Surface Shader结构:
+            最终会编译为一个复杂的vertex+fragment Shader.
+            写在Pass块中（如果只有一个Pass,可以省略，写在SubShader块中）
+
+            CGPROGRAM
+            #pragma surface surf Lambert    //表面函数为surf,使用光照模型为Lambert
+            ...
+            void surf (Input IN, inout SurfaceOutput o){}
+            ENDCG
+
+            其中SurfaceOutput：
+            struct SurfaceOutput
+            {
+                half3 Albedo;       //颜色纹理
+                half3 Normal;       //法线
+                half3 Emission;     //自发光，不受照明的影响
+                half Specular;      //高光指数
+                half Gloss;         //光泽度
+                half Alpha;         //透明度,Alpha 通道
+            }
+4.Shader的数据接口 属性和uniform变量
+    1.定义属性值
+        Properties
+        {
+            _MyTexture ("Texture (RGB)", 2D) = "white" {}       //texture property
+            _MyColor ("Color of Object", Color) = (1,1,1,1)     // color property
+            _MyCube ("Environment map", Cube ) = "white"{}      //3d texture property(cube map),need 6 textures
+            _MyVector ("Vector", vector) = (1,1,1,1)            //vector property
+            _MyFloat ("Float Value", float) = 1.0               //float property
+            _MyRange ("Another type of float", range(-10,10))=1.0   //float property with range
+        }
+
+        _VarName("inspector show name", varType) = default value
+    2.在脚本中操控Material属性
+        Material的方法中有获取和设置属性的接口
+        public Material mat;
+
+        mat.SetXXX("property Name",value)
+        mat.GetXXX("property Name")
+
+        Set/GetTexture
+        Set/GetColor
+        Set/GetTexture
+        Set/GetFloat
+    3.矩阵
+    不能在属性块中定义
+    可以在Shader中对一个矩阵进行声明，Material中有Get/SetMatrix的接口
+    uniformfloat4x4 myMatrix;
+
+    mat.SetMatrix("myMatrix",matrix);
+    mat.GetMatrix("myMatrix");
+
+    4.在Cg代码中使用属性
+        在Cg代码中声明：
+        CgVarType _VarName;     //varType _VarName
+
+        CgVarType       varType;
+        sampler2d       2D
+        samplerCUBE     Cube
+        float4          Color
+        float4          vector
+        float           float
+        float           range(n,m)
+
+        此外，数据类型中有：
+        float       float4      32位
+        half        half4       16位
+        fixed       fixed4      8位
+5.空间概念
+    ref:OpenGL
+        计算机图形的要点是，创建三维物体的二维图像。
+        尽量在三维空间中想象物体的形状。
+        为把一个物体的三维坐标变换为屏幕上的像素坐标,需要以下3个步骤：
+        1.变换。
+            包括模型、视图和投影操作。它们是由矩阵乘法表示的，这些操作包括旋转、移动、缩放、反射、正投影和头饰投影。
+            一般情况下，在绘制场景时，需要组合使用几种变换。
+        2.裁剪。
+            由于场景时在一个矩形窗口中渲染的，因此位于窗口之外的物体（或物体的一部分）必须裁剪掉。
+            在三维计算机图形中，裁剪就是丢弃位于裁剪平面之外的物体。
+        3.视口变换
+            最后，经过了变换的坐标和屏幕像素之间必须建立对应关系。这个过程称为视口变换。
+            把三维的模型坐标转换为屏幕坐标
+        
+    1.*模型空间*(Model Space)
+        模型物体都有一个以它自己的Pivot为原点的三维坐标空间。
+        相对于模型自己的Pivot为原点的空间，叫做模型空间。
+        模型空间在处理物体自身的一些相对关系时比较有用，eg.自身的面、线、点等。
+
+        从*世界空间*到*模型空间*的转换：
+        脚本中：
+        transform.woldToLocalMatrix     //transform的世界空间到模型空间的转换矩阵
+        transform.worldToLocalMatrix.MultiplyPoint(Vector3 v);      //将v点转化到transform的模型空间的位置
+        transform.worldToLocalMatrix.MultiplyVector(Vector3 v);     //将v方向向量转到transform的模型空间向量
+        Shader中：
+        左乘_World2Object矩阵
+    2.*世界空间*
+        3D
+        以世界坐标空间作为统一表达。
+        当有多个物体的时候，所有物体使用世界空间坐标系来表达相对关系、位置、大小、旋转。
+
+        从*模型空间*到*世界空间*的转换:
+        脚本中：
+        transtorm物体自身以模型空间坐标表达式的矢量变换到实践坐标表达式的矩阵和方法
+        transform.localToWorldMatrix     
+        transform.localToWorldMatrix.MultiplyPoint(Vector3 v);      
+        transform.localToWorldMatrix.MultiplyVector(Vector3 v);     
+        Shader中：
+        左乘_Object2World矩阵
+    3.*视空间*
+        3D
+        视空间又称为相机空间，为了方便表达以*相机为参考中心*时所有物体的相互关系的一个空间。
+
+        从*世界空间*变换到*视空间*：
+        脚本：
+        通过Camera组件的worldToCameraMatrix,将一个世界坐标向量变换为以此相机为中心的空间表达式
+        Camera.cameraToWoldMatrix，将以此相机空间的坐标系转换到世界坐标系
+        Shader:
+        使用矩阵UNITY_MATRIX_MV将向量从*模型空间*转到*视空间*
+        MV:Model to View
+    4.*视锥体*
+        3D
+        视锥体是看得到的部分。也即存在于相机的视锥体中,即存在于镜头中。
+        只有处于视锥体内的物体才会被渲染，也就是在屏幕上能看到的东西。
+        视锥体是由远近裁剪屏幕以及视角大小所顶一个的一个平头锥体，而相机处于锥体的顶点上。
+        这个剔除掉视锥体以外的物体的过程，叫做Culling.
+    5.*剪切空间*
+        3d-->2d
+        从视锥体（视线平截体，代表了眼空间中物体的可见区域），到2D屏幕上的坐标变换。
+        这个过程的变换叫做*投影变换*
+        (将3d物体投影到2d屏幕上？）
+        从视锥体的三维空间，到二维平面上，需要首先进行一次*投影*,把视锥体变为一个长方体。
+        这次变化是vertex Shader任务的重点。之后的引擎会自动处理下面的事情，把坐标转到NDC(Normalized Device Coordinates).
+        这是一个无量纲的空间，OpenGL和Direct3D稍有不同:
+        OpenGL 值域 （-1，-1，-1）到 （1,1,1）
+        Direct3D值域 （-1,0，-1）到（1,1,1，）
+        变换：
+        脚本：
+        (?从世界空间，到相机的投影空间的投射矩阵？？)
+        此投影操作是Camera组件的projectionMatrix
+        Shader:
+        从模型空间投影到屏幕上
+        UNITY_MATRIX_MVP
+        MVP: Model View Projection
+6.基本的光照模型
+    1.光源对物体照明的分类
+        间接照明:
+        光在物体间传播后，最终又对物体形成的照明。
+        eg.通过光线跟踪，光线多次反弹对物体进行照明。
+        一般光线用烘焙lightmap和lightprob的方式进行，不做实时计算。
+        直接照明：
+        不考虑光线在物体间的传播，也不考虑光线在物体内部传播，光线对物体直接照明
+            分为两种：
+            .漫反射
+            .镜面反射
+                形成强烈高光
+        直接照明是实时渲染的计算重点。
+    2.Unity中的光照模型
+        1.漫反射和Lambert
+            .漫反射
+                对于粗糙物体表面的某一点，其亮度应该和入射光线与该点的垂直程度相关，也就是入射光线与此法线的夹角相关。
+                如果，用L代表单位长度的入射光线，C代表达到此点的光线的强度和颜色，N代表此点的法线，则物体表面此点的亮度Lum表示为:
+                Lum=C*max(0,cos<L,N>)
+                   =C*max(0,L·N)
+                <L,N>表示矢量L和N之间的夹角。
+                实际计算L·N可以用Cg标准库函数 dot(L,N)计算。
+                使用max(0,value)来控制，如果是背光，最终结果不能为负值。
+            .Lambert
+                没有高光,适合制作橡胶类的东西
+            可以把按照这种方式对物体进行照明计算的模型叫做*Lambert*
+            Surface Shader中有两个内置的Lighting Model函数:
+            LightLambert()                      Forward渲染路径下的Lambert光照方式
+            LightingLambert_PrePass()           Deferred渲染路径下的Lambert光照方式
+            位于Editor/Data/CGIncludes/Lighting.cginc文件中,函数如下：
+            inline fixed4 LightLambert (SurfaceOutput s,fixed3 lightDir,fixed atten)
+            {
+                fixed diff=max(0,dot(s.Normal,lightDir));   //对漫反射的计算
+                fixed4 c;
+                //计算物体表面的纹理颜色、光源颜色以及光源强度的影响
+                c.rgb=s.Albedo * _lightColor0.rgb * (diff * atten *2);
+                c.a=s.Alpha;
+                return c;
+            }
+            note:Unity5.x此函数发生了变换，可以添加多个光照的漫反射光
+        2.镜面高光和Phong
+            .镜面高光
+                某一光线ray在某一法线为normal的点，反射后的光线，使用Cg标准库中的reflect(ray,normal)进行计算
+                如果用R表示光线在此点的单位长反射方向向量，V表示视线的单位方向向量，gloss表示表面的镜面光滑程度，
+                那么高光Spec计算方式为:
+                Spec=pow(max(0,cos<V,N),gloss)
+                    =pow(max(0,dot(V,N),gloss)
+            .Phong
+                有高光
+                ref 百度：
+                Phong光照模型分为三个累加阶段：漫反射，镜面反射和环境光
+            Lambert的漫反射加上镜面高光，就是Phong
+                c.rgb=s.Albedo * _lightColor0.rgb * ((diff+Spec) * atten *2);
+            note:这个书里面说的不完全正确,需要参考其他书籍
+        3.半角向量和BlinnPhong
+            在上面高光计算的方式中，计算了一次入射光线的反射，然后考察此反射光线进入视野的程度。
+            另外一种更简单、更易于调节的方式是，使用入射光线和视线的中间平均值，即*半角向量*，然后使用此半角向量和法线计算出一个和视角相关的高光。
+            此种高光计算方式为*BlinnPhong*
+            Surface Shader中有两个内置的Lighting Model函数:
+            LightingBlinnPhong()                    Forward渲染路径下的BlinnPhong光照方式
+            LightingBlinnPhong_PrePass()            Deferred渲染路径下的BlinnPhong光照方式
+            位于Editor/Data/CGIncludes/Lighting.cginc文件中,函数如下：
+            inline fixed4 LightingBlinnPhong (SurfaceOutput s,fixed3 lightDir,half3 viewDir,fixed atten)
+            {
+                half3 h=normalize(lightDir+viewDir);
+                fixed diff=max(0,dot(s.Normal,lightDir));
+                float nh=max(0,dot(s.Normal,h));
+                float spec=pow(nh,s.Specular*128.0) * s.Gloss);
+
+                fixed4 c;
+                c.rgb=(s.Albedo*_LightColor0.rgb*diff+_LightColor0.rgb*_SpecColor.rgb*spec)*(atten*2);
+                c.a=s.Alpha+_LightColor0.a*_SpecColor.a*spec*atten;
+                return c;
+            }
+7.Unity中的照明
+            
+
+
+
+        
+        
+
+
+
