@@ -1,2 +1,5 @@
 # CYC
-cyc test
+  Notes
+  .gitNotes
+  .shaderNotes
+
