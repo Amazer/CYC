@@ -66,8 +66,14 @@
 10.添加远程仓库,现有本地库，然后和远程库关联    
     1.登录github->create a new repo
     2.可以从这个仓库克隆新的仓库，也可以吧一个已有的本地仓库与之关联，然后吧本地仓库的内容推送到github仓库
+        1.如果使用git协议克隆远程仓库，自动回管理本地与远程仓库
+            git clone git@github.com:YouName/YouRepo.git
+        2.使用https协议克隆，需要为本地仓库和远程仓库建立连接
+            git clone https://github.com/YouName/YourRepo.git
+            git remote remove origin    //可能需要先删除本地的ogrin
+            git remote add origin git@github.com:YouName/YourRepo.git       //最终，使用此命令来连接本地和远程仓库
     在本地仓库下运行命令,添加远程库名字为origin：
-        git remote add origin git@github.com:YourName/yourRepo.git
+            git remote add origin git@github.com:YourName/YouRepo.git
     第一次把本地库的所有内容推送到远程库上：
     git push -u origin master
     git push -u <本地库> <远程库>
@@ -141,7 +147,7 @@
     强制删除没有合并的分支：
     git branch -D <branch_id>
 16.多人协作
-   当从远程仓库克隆时，git自动会把本地的master分支和远程的master分支对应起来，并且，远程仓库的默认名字是origin 
+    当从远程仓库克隆时，git自动会把本地的master分支和远程的master分支对应起来，并且，远程仓库的默认名字是origin 
     1.git remote  查看远程库信息
     git remote -v   显示更详细的信息
     ....(fetch)         可以抓取的地址
