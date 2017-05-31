@@ -3,7 +3,6 @@
     *vertex and fragment shaders*
     *fixed function shaders*
 2.流程图
-
     1.shaderlab 
 
     Transform,TexGen,Lighting                                       Texturing Fog
@@ -54,10 +53,7 @@
                        |                                        |                                                         |                                         |
                        -----→ Programmable Vertex Processor -----                                                         ------→ Programmable Fragment Processor ---
                                 (可编程顶点处理器)
-
 3.固定管线和可编程流水管线
-
-
 *<Cg教程>*                                
 1.图形硬件流水线
     一个流水线是一序列可以并行和按照固定顺序进行的阶段。
@@ -139,10 +135,7 @@
                                                                                           |                |  |                 ↑                                               |
                                                                                           |      模板      |  |                 |                                               |
                                                                                           ---→  缓冲区  ←---  --深度缓冲区      -------------------------------------------------
-                                                                                          
-
 2.可编程图形流水线(The Programmable Graphics Pipeline)
-
                   3D应用程序或游戏
                         |
             3D API      |
@@ -225,6 +218,7 @@
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 *<Untiy3d ShaderLab>*
+note:豆瓣评这本书挺烂的，我也这么认为。很多内容都不符合标题要说的东西。概念也不说,或者有的说的也有问题。在没有弄清楚之前，还是不看这个了。
 1.Shader结构
     Shader，定义文件名
 
@@ -559,12 +553,11 @@
                 return c;
             }
 7.Unity中的照明
-            
+    1.渲染路径和Pass的LightMode标签
+        Unity支持3种*RenderingPath*(*渲染路径*),分别为VertexLit,Forward和Deferred Lighting.
+        为此，在Pass中使用的*LightMode*标签Vertex,ForwardBase,ForwardAdd,PrepassBase,PrepassFinal等，分别表示当前Pass是在哪个RenderingPath下设计使用。
+    2.设计可以检测渲染路径的材质
 
-
-
+<*Shader 入门精要*>
+note:知乎推荐，初步看了下，很好的书
         
-        
-
-
-
