@@ -67,7 +67,7 @@
     1.登录github->create a new repo
     2.可以从这个仓库克隆新的仓库，也可以吧一个已有的本地仓库与之关联，然后吧本地仓库的内容推送到github仓库
     在本地仓库下运行命令,添加远程库名字为origin：
-    git remote add origin git@github.com:YourName/yourRepo.git
+        git remote add origin git@github.com:YourName/yourRepo.git
     第一次把本地库的所有内容推送到远程库上：
     git push -u origin master
     git push -u <本地库> <远程库>
