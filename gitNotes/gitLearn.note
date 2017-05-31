@@ -72,6 +72,7 @@
             git clone https://github.com/YouName/YourRepo.git
             git remote remove origin    //可能需要先删除本地的ogrin
             git remote add origin git@github.com:YouName/YourRepo.git       //最终，使用此命令来连接本地和远程仓库
+            git push --set-upstream origin master   //如果clone的是master,直接将origin和远程仓库master相连
     在本地仓库下运行命令,添加远程库名字为origin：
             git remote add origin git@github.com:YourName/YouRepo.git
     第一次把本地库的所有内容推送到远程库上：
