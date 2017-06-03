@@ -6,11 +6,13 @@
         Clipping
         Culling
         Scissor
+    note:不同的参考资料中给出的流水线名、顺序可能不相同，一个原因是由于图像编程接口（eg.OpenGL和DirectX）的实现不同，
+        另一个原因是GPU在底层可能做了很多优化（eg.Early-Z 提前深度测试）。
 2.流程图
     1.shaderlab 
 
-    Transform,TexGen,Lighting                                       Texturing Fog
-                                ------>  Culling DepthText  ----->                  ----->  Alpha Test ------> Blending
+    Transform,TexGen,Lighting                   (Early-Z技术)       Texturing Fog
+                                ------>  Culling DepthTest  ----->                  ----->  Alpha Test ------> Blending
     Vertex Shader                                                   Fragment Shader 
 
     2.图形硬件流水线
@@ -816,7 +818,7 @@ note:知乎推荐，初步看了下，很好的书.从基础讲起，建立读�
                                                 开始混合
                                                    |
                                                    ↓            否
-                                                是否开启了混合 ----------------------------
+                                             是否开启了混合 -------------------------------
                                                    |                                      |
                               (Src)                | 是             (Dst)                 |
                             得到源颜色 <-----------|-----------> 得到目标颜色             |
@@ -833,6 +835,30 @@ note:知乎推荐，初步看了下，很好的书.从基础讲起，建立读�
                                                   |
                                                   ↓
                                               混合结束
+                如果没有开启混合，片元的颜色会直接覆盖颜色缓冲区中的颜色，这也是初学者无法得到透明效果的原因。
+                如果开启了混合，GPU会去除源颜色和目标颜色，进行混合。
+                    源颜色：片元着色器得到的颜色值
+                    目标颜色：已经存在于颜色缓冲区中的颜色值。
+                混合操作(Blend)： Off|Operations
+                    BlendOP:Add|Sub|RevSub|Min|Max|...DX11.1 only
+                    BlendFactors:One|Zero|SrcColor|SrcAlpha|DstColor|DstAlpha|OneMinuseSrcColor|OneMinuseSrcAlpha|OneMinuseDstColor|OneMinuseDstAlpha
+        Note:上面的测试顺序并不是唯一的。
+            对于大多数GPU来说，会尽可能在执行片元着色器之前就进行这些测试（避免计算出颜色后，缺没有通过各种测试）。(先测试？后颜色？)
+            Early-Z技术：深度测试在片元着色之前进行。（GPU尽早的知道哪些片元会舍弃，这些片元就不再需要使用片元着色器计算颜色）
+            Unity3d中使用了此技术。
+                但是，如果将这些测试提前的话，其检验结果可能会与片元着色器中的一些操作冲突。例如，在片元着色器中进行了透明度测试(在着色器中调用了API，比如clip函数)来手动
+                将其舍弃掉。这会导致GPU无法提前执行各种测试。
+                因此，现在的GPU会判断片元着色器中的操作是否和提前测试发生冲突,如果有冲突，就会禁用提前而是。但是这样也会造成性能上的下降,因为有更多的片元需要被处理了。
+                这也是透明度测试会导致性能下降的原因(无法使用Early测试)。
+        双缓冲(Double Buffering)策略：
+            当模型的图元经过了上面层层计算和测试后，就会显示到屏幕上。屏幕上显示的就是颜色缓冲区中的颜色值。
+            为了避免我们看到那些正在进行光栅化的图元，GPU会使用双缓冲策略。
+            即，对场景渲染是发生在幕后的，即，在后置缓冲区(Back Buffer)中。一旦场景已经被渲染到了后置缓冲区中，GPU就会交换后置缓冲区和前置缓冲区（Front Buffer）中的内容，
+            而前置缓冲区是之前显示在屏幕上的图形。
+            由此保证我们看到图像总是连续的。
+------------------------->page 18
+                    
+                
                                                   
                                                   
 
