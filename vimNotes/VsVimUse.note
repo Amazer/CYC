@@ -1,0 +1,183 @@
+0.1.提纲
+    1.配置快捷键
+        1.四种模式：normal,insert,visual,command
+        2.映射
+           map:imap,nmap,vmap,cmap
+           noremap:inoremap,nnoremap,vnoremap,cnoremap
+        3.Visual Studio 快捷键
+            0.VsVim配置
+                Optins->VsVim->
+                            Defaults:Use Editor Command Margin->False (否则，有命令框)
+                            Keyboard:set your Keyboard
+                                    ->include All Scopes
+            1.VsVimrc路径
+                home下，_vsvimrc
+            2.Vs命令查看方式：
+                英语环境
+                Tools->Options->Environment->Keyboard
+                View->OtherWindow->Command Window
+            3.在vim中调用快捷命令
+                :vsc VAssistX.OpenFileInSolutionDialog<cr>
+                
+    2.vim的常用命令
+        1.normal模式下
+            1.移动
+                .基本移动
+                    hjkl
+                    j:下
+                    k:上
+                    h:左
+                    l:右
+                .单词移动
+                    w:word  "跳转到单词的头"
+                    W:WORD
+                    e:word's end   "跳转到单词的结尾"
+                    E:WORD's end
+                    ge:word's end "跳转到上一个单词的结尾"
+                    gE:WORD's end
+                    b:back "跳转到单词的头"
+                    B:back "跳转到WORD的头"
+                .行移动
+                    _： 跳转到行的第一个字符
+                    0:  跳转到行首
+                    $:  跳转到行的最后一个字符
+                .屏幕移动
+                    gg: 跳转到文件首部
+                    G:  跳转到文件结尾
+                    12gg:   跳转到第12行
+                    zz: 当前光标移动到屏幕最中央
+                    zt: 当前光标移动到屏幕最上方（top）
+                    zb: 当前光标移动到屏幕最下方（bottom）
+                    c-f:    下翻半页
+                    c-u:    上翻半页
+            2.进入插入模式
+                i:  插入到光标前
+                I:  插入到行的最前面
+                a:  插入到光标后
+                A:  插入到行的最后面
+                s:删除光标下的字符，并进入插入模式
+                S:删除当前行所有字符，并进入插入模式
+                ce/cw: 删除当前光标到word末尾处的字符，进入插入模式
+
+                o:插入到下一行
+                O:插入到上一行
+            3.撤销和reDo
+                u:  撤销
+                c-r: redo
+            4.替换
+                r:  用输入替换光标下的字符
+                R:进入替换模式
+            5.查找：
+                .单行
+                f{char}:    从当前光标向后查找char。
+                F{char}:    从当前光标向前查找char
+                t{char}:    从当前光标向后查找char,光标落到char之前
+                T{char}:    从当前光标向前查找char,光标落到char之后
+                    ; :下一个char
+                    , :上一个char
+                .整个文件中查找
+                / : 从当前行向下查找
+                ? : 从当前行向上查找
+                * : 从当前向下，查找当前光标下的word 
+                # : 从当前向上，查找当前光标下的word 
+                n : 下一个查找结果
+                N : 上一个查找结果
+            6.删除
+                x:剪切当前光标下的字符
+                X:剪切当前光标前的一个字符
+                
+                d{motion}:删除
+                dl: 删除当前光标下的一个字符
+                de/dw: 删除当前光标下到word end的字符
+                db: 删除当前光标下，到word head的字符
+                D:  删除当前光标下到行尾的字符
+            7.复制
+                y{motion}:复制
+                yl: 复制当前光标下的一个字符
+                yy/Y：复制当前行
+                ye/yw: 复制当前光标到word end的字符
+                yb:复制当前光标前一字符到word head的字符
+            8.粘贴
+                p:粘贴到当前光标后
+                P:粘贴到当前光标前
+                
+            9.点范式（.）
+                . :重复上次的修改(移动，删除，增加)
+            10.组合命令
+                yyp:复制当前行到下一行
+                ddp:和下一行交换（删除当前行，复制到下一行）
+                xp:交换两个chr的位置
+    3.mark
+    4.其他
+        1.重要配置
+            set backspace=indent,eol,start "退格键设置"
+            set clipboard=unnamed   "默认的剪切寄存器"
+            set ignorecase  "忽略大小写"
+        2.推荐配置
+            1.注释
+                :vnoremap ci :s/^/\/\/<cr>
+                :vnoremap cu :s/\/\//<cr>
+                :nnoremap ci :s/^/\/\/<cr>
+                :nnoremap cu :s/\/\//<cr>
+            2.相关配置
+                .单个文件中：
+                :inoremap jj <esc>  "退出插入模式"
+                :noremap gd <c-]>zz "跳转到定义"
+                :nnoremap gq ==     "代码格式format"
+                :vnoremap gq ==
+                :nnoremap <space> za "折叠"
+                :nnoremap zm :vsc VAssistX.ListMethodsInCurrentFile<cr> "函数列表"
+                :nnoremap cj :vsc VAssistX.FindReferencesinFile<CR> "当前文件中的引用"
+                :nnoremap ca :vsc VAssistX.FindReferences<CR> "查看所有引用"
+                :nnoremap cm :vsc File.OpenContainingFolder<CR> "打开所在文件夹"
+                :nnoremap zj :vsc Edit.QuickInfo<CR> "查看函数定义文档"
+                :nnoremap zp :vsc VAssistX.RefactorImplementInterface<CR> "实现接口"
+                
+                "visual模式中的查找"
+                :vnoremap * "/y/<C-r>/<CR>
+                :vnoremap # "/y?<C-r>/<CR>
+                
+                .多文件
+                :nnoremap <c-o> :vsc View.NavigateBackward<CR>  
+                :nnoremap <c-i> :vsc View.NavigateForward<CR>
+                
+                "打开查看类的对话框
+                :nnoremap cs :vsc VAssistX.FindSymbolDialog<CR>
+                
+                "打开查看文件的对话框
+                :nnoremap cf :vsc VAssistX.OpenFileInSolutionDialog<CR>
+                
+                "open VAOutline
+                :nnoremap co :vsc VAssistX.VAOutline<CR>
+                
+                "打开解决方案资源管理器
+                :nnoremap cv :vsc View.SolutionExplorer<CR>
+                
+                "在文件中查找
+                :nnoremap ck :vsc Edit.FindinFiles<CR>
+                
+                "end
+    
+0.2.vim基础知识
+    1.三种模式
+    2.配置文件
+1.VsVim的配置
+    0.配置文件 .vimrc/_vimrc
+    1.so vimrcFullPath
+    2.vimrc settings
+        set backspace=indent,eol,start
+        <c-i>等于<tab>
+2.小技巧
+    1.
+    ctrl+h 删除前一个字符，相当于退格键
+    ctrl+w 删除前一个单词
+    ctrl+u 删除至行首
+    2.
+    num<C-a> :第一个遇到的数字加num 
+    num<C-x> :第一个遇到的数字减num 
+3.实用技巧
+    1.mark
+        .本文件mark
+        .全部文件范围mark
+    2.快捷键映射
+        :vsc xxxxx  "调用visual studio command,可以查看vs的设置
