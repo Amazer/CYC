@@ -60,7 +60,7 @@
                        -----→ Programmable Vertex Processor -----                                                         ------→ Programmable Fragment Processor ---
                                 (可编程顶点处理器)
 3.固定管线和可编程流水管线
-*<Cg教程>*                                
+<<Cg教程>>                                
 note:有一些地方不是很明白。（眼空间那块。。。）
 1.图形硬件流水线
     一个流水线是一序列可以并行和按照固定顺序进行的阶段。
@@ -224,7 +224,7 @@ note:有一些地方不是很明白。（眼空间那块。。。）
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-*<Untiy3d ShaderLab>*
+<<Untiy3d ShaderLab>>
 note:豆瓣评这本书挺烂的，我也这么认为。很多内容都不符合标题要说的东西。概念也不说,或者有的说的也有问题。在没有弄清楚之前，还是不看这个了。
 1.Shader结构
     Shader，定义文件名
@@ -565,7 +565,7 @@ note:豆瓣评这本书挺烂的，我也这么认为。很多内容都不符合
         为此，在Pass中使用的*LightMode*标签Vertex,ForwardBase,ForwardAdd,PrepassBase,PrepassFinal等，分别表示当前Pass是在哪个RenderingPath下设计使用。
     2.设计可以检测渲染路径的材质
 
-<*Shader 入门精要*>
+<<Shader 入门精要>>
 note:知乎推荐，初步看了下，很好的书.从基础讲起，建立读者对渲染流程的基本认识。
 源码地址：https://github.com/candycat1992/Unity_Shaders_Book
 .基础部分
@@ -895,6 +895,6 @@ Note:上面的测试顺序并不是唯一的。
 
 
 
-<*Unity Shaders and Effects Cookbook*>                                                           
+<<Unity Shaders and Effects Cookbook>>                                                           
 note:很好的书。不是按照基础→应用的方式讲过的。按照应用→原理方式讲述。讲解了创建着色器和后期特效模板测试结束。与应用结合紧密。
         
