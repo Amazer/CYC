@@ -1466,17 +1466,93 @@ Note:上面的测试顺序并不是唯一的。
                     得到nose在观察空间的位置坐标为viewPos=(9,8.84,-27.31)
         4.*裁剪空间*(*clip space*,*齐次裁剪空间*)
             接下来，将顶点从观察空间变换到裁剪空间。这个用于变换的矩阵叫做*裁剪矩阵*(*clip matrix*),也被称为*投影矩阵*(*projection matrix*)。
-------------->page 77
-
-
-
-
-
-
-
-        
-
-
+            裁剪空间的大小由*视锥体*(*view frustum*)来决定。
+            *视锥体*指的是空间中的一块区域，摄像机可以看到的空间。视锥体由六个平面包围而成，这些平面也被称为*裁剪平面*(*clip planes*)。
+            视锥体有两种投影类型：*正交投影*(*orthographic projection*)和*透视投影*(*perspectiv projection*)
+            裁剪平面中的*近裁剪平面*(*near clip plane*)和*远裁剪平面*(*far clip plane*)决定了摄像机可以看到的深度范围。
+            通过投影矩阵，将顶点变换到裁剪空间中。
+            .投影矩阵有两个目的：
+                1.为投影做准备
+                    投影矩阵并没有真正进行投影工作，而是在为投影做准备。真正的投影发生在后面的*齐次除法*(*homogeneous division*)过程中。
+                    经过投影矩阵的变换后，顶点的w分量将会有特殊的意义。
+                    投影是个降为的过程，将顶点从三维空间降到二维屏幕空间。通过齐次除法得到二维空间坐标。
+                2.对x、y、z分量进行缩放。
+                    经过投影矩阵的缩放后，可以直接使用w分量作为一个范围值。如果x、y、z分量都在这个范围内，就说明该顶点位于裁剪空间内。
+            投影的处理：
+            1.透视投影
+                视锥体定义了场景中的一块三维空间，所有位于这块空间内的物体将会被渲染，否则就会被*剔除*或者*裁剪*。
+                Unity中，Camera组件：
+                    Field of View (FOV):改变视锥体竖直方向的张开角度.
+                    Clipping Planes中，Near和Far参数可用控制视锥体的近裁剪平面和远裁剪平面。
+                    由此，可以求得视锥体近裁剪屏幕和远裁剪平面的高度Height：
+                        nearClipPlaneHeight=2·Near·tan(FOV/2)
+                        farClipPlaneHeight=2·Far·tan(FOV/2)
+                    视锥体的横向width由通过*摄像机的横纵比*(*Aspect*)得到。
+                    Unity中摄像机的横纵比由Game视图的横纵比和ViewPort Rect中的W和H属性共同决定：
+                        Aspect=(nearClipPlaneWidth/nearClipPanelHeight)
+                        Aspect=(farClipPlaneWidth/farClipPanelHeight)
+                    Unity中，根据已知的Near、Far、FOV和Aspect的值来确定投影矩阵：
+                                         --                                                                                                --  
+                                         | (cot(FOV/2))/Aspect      0                   0                           0                       |  
+                             M(frustum)= |   0                    cot(FOV/2)            0                           0                       |  
+                                         |   0                      0         -((Far+Near)/(Far-Near))      -((2·Near·Far)/(Far-Near))      |  
+                                         |   0                      0                   0                           0                       |
+                                         --                                                                                                --  
+                            正割:secθ=1/(cosθ) 
+                            余割:cscθ=1/(sin) 
+                            余切:cotθ=(cosθ/sinθ)=(cscθ/secθ)
+                        note:这里的投影矩阵是以Unity中的坐标系为参考的，即观察空间为右手坐标系，使用列矩阵在矩阵右侧进行相乘 且变换后，z分类范围在[-w,w]之间。
+                        note:在DirectX中，变换后z分类的范围是在[0,w]之间，因此投影矩阵也不一样。
+                    顶点和投影矩阵相乘，得到顶点在裁剪空间中的位置：
+                        P(clip) = M(frustum)·P(view)
+                                 --                                                                                            --  -- --
+                                 | (cot(FOV/2))/Aspect      0                   0                           0                   |  | x |
+                                =|   0                    cot(FOV/2)            0                           0                   |  | y |
+                                 |   0                      0         -((Far+Near)/(Far-Near))      -((2·Near·Far)/(Far-Near))  |  | z |
+                                 |   0                      0                   0                           0                   |  | 1 |
+                                 --                                                                                            --  -- --
+                                 --                                                   --  
+                                 |                   x(cot(FOV/2)/Aspect)              |  
+                                =|                     y(cot(FOV/2)                    |  
+                                 | -z((Far+Near)/(Far-Near))-((2·Near·Far)/(Far-Near)) |  
+                                 |                           -z                        |  
+                                 --                                                   --
+                    .投影矩阵的本质就是对x、y、z和w分量进行了不同程度的缩放（z分量还做了一个平移），目的在于方便裁剪.
+                    .此时顶点的w分量不再是1,而是-z。
+                    .如果一定顶点在视锥体内，那么变换后的坐标必须满足：
+                        -w  <=  x   <=w
+                        -w  <=  y   <=w
+                        -w  <=  z   <=w
+                        任何不满足上述条件的图元都需要被*剔除*或者*裁剪*。
+                    .裁剪矩阵还改变了空间的旋向性：空间从右手坐标系变换到了左手坐标系。离相机越远，z值将越大。
+            2.正交投影
+                Unity中，通过Camera组件：
+                    Size:视锥体竖直方向上高度的半，即
+                        nearClipPanelHeight=2·Size
+                        farClipPanelHeight = nearClipPanelHeight
+                
+                        nearClipPlaneWidth=Aspect·nearClipPanelHeight
+                        farClipPlaneHeight=nearClipPlaneWidth
+                                     --                                                                                                --  
+                                     | 1/(Aspect·Size)          0                   0                           0                       |  
+                           M(prtho)= |   0                    1/Size                0                           0                       |  
+                                     |   0                      0         -(2/(Far-Near))                 -((Near+Far)/(Far-Near))      |  
+                                     |   0                      0                   0                           1                       |  
+                                     --                                                                                                --  
+                        P(clip) = M(prtho)·P(view)
+                                 --                                                                                                -- -- --
+                                 | 1/(Aspect·Size)          0                   0                           0                       | | x |
+                                =|   0                    1/Size                0                           0                       | | y |
+                                 |   0                      0         -(2/(Far-Near))                 -((Near+Far)/(Far-Near))      | | z |
+                                 |   0                      0                   0                           1                       | | 1 |
+                                 --                                                                                                -- -- --
+                                 --                                              --  
+                                 |                   x/(Aspect·Size)              |  
+                                =|                     y(Size)                    |  
+                                 |       -(2z/(Far-Near))-((Far+Near)/(Far-Near)) |  
+                                 |                           1                    |
+                                 --                                              -- 
+        3.*屏幕空间*(*screen space*)
 
 
 <<Unity Shaders and Effects Cookbook>>                                                           
