@@ -14,7 +14,7 @@
     Transform,TexGen,Lighting                   (Early-Z技术)       Texturing Fog
                                 ------>  Culling DepthTest  ----->                  ----->  Alpha Test ------> Blending
     Vertex Shader                                                   Fragment Shader 
-
+    
     2.图形硬件流水线
 
                 顶点连接信息
@@ -1464,11 +1464,11 @@ Note:上面的测试顺序并不是唯一的。
                                  |   0    0       0       1   |  |   1    |   |   1    |
                                  --                          --  --      --   --      --
                     得到nose在观察空间的位置坐标为viewPos=(9,8.84,-27.31)
-        4.*裁剪空间*(*clip space*,*齐次裁剪空间*)
+        4.*裁剪空间*(*clip space*,*齐次裁剪空间*)(左手坐标系)
             接下来，将顶点从观察空间变换到裁剪空间。这个用于变换的矩阵叫做*裁剪矩阵*(*clip matrix*),也被称为*投影矩阵*(*projection matrix*)。
             裁剪空间的大小由*视锥体*(*view frustum*)来决定。
             *视锥体*指的是空间中的一块区域，摄像机可以看到的空间。视锥体由六个平面包围而成，这些平面也被称为*裁剪平面*(*clip planes*)。
-            视锥体有两种投影类型：*正交投影*(*orthographic projection*)和*透视投影*(*perspectiv projection*)
+            视锥体有两种投影类型：*正交投影*(*orthographic projection*)和*透视投影*(*perspective projection*)
             裁剪平面中的*近裁剪平面*(*near clip plane*)和*远裁剪平面*(*far clip plane*)决定了摄像机可以看到的深度范围。
             通过投影矩阵，将顶点变换到裁剪空间中。
             .投影矩阵有两个目的：
@@ -1539,20 +1539,76 @@ Note:上面的测试顺序并不是唯一的。
                                      |   0                      0         -(2/(Far-Near))                 -((Near+Far)/(Far-Near))      |  
                                      |   0                      0                   0                           1                       |  
                                      --                                                                                                --  
-                        P(clip) = M(prtho)·P(view)
-                                 --                                                                                                -- -- --
-                                 | 1/(Aspect·Size)          0                   0                           0                       | | x |
-                                =|   0                    1/Size                0                           0                       | | y |
-                                 |   0                      0         -(2/(Far-Near))                 -((Near+Far)/(Far-Near))      | | z |
-                                 |   0                      0                   0                           1                       | | 1 |
-                                 --                                                                                                -- -- --
-                                 --                                              --  
-                                 |                   x/(Aspect·Size)              |  
-                                =|                     y(Size)                    |  
-                                 |       -(2z/(Far-Near))-((Far+Near)/(Far-Near)) |  
-                                 |                           1                    |
-                                 --                                              -- 
-        3.*屏幕空间*(*screen space*)
+                            P(clip) = M(prtho)·P(view)
+                                     --                                                                                                -- -- --
+                                     | 1/(Aspect·Size)          0                   0                           0                       | | x |
+                                    =|   0                    1/Size                0                           0                       | | y |
+                                     |   0                      0         -(2/(Far-Near))                 -((Near+Far)/(Far-Near))      | | z |
+                                     |   0                      0                   0                           1                       | | 1 |
+                                     --                                                                                                -- -- --
+                                     --                                              --  
+                                     |                   x/(Aspect·Size)              |  
+                                    =|                     y(Size)                    |  
+                                     |       -(2z/(Far-Near))-((Far+Near)/(Far-Near)) |  
+                                     |                           1                    |
+                                     --                                              -- 
+        5.*屏幕空间*(*screen space*)
+            把视锥体投影到屏幕空间，生成二维坐标。
+            上一步得到裁剪空间中的坐标为clip=(x,y,z,w)
+            .步骤：
+                1.标准*齐次除法*(*homogeneous division*),也被称为*透视除法*(*perspective division*)
+                    用齐次坐标系的w分量去除以x、y、z分量。
+                    在OpenGL中，把这一步得到的坐标叫做*归一化的设备坐标*(*Normalized Device Coordinates*, *NDC*)
+                    (归一化的设备坐标就是单位比例的位置表示)
+                    经过齐次除法之后的裁剪空间会变到一个立方体内。
+                    按照OpenGL的传统，这个立方体的x、y、z分量范围都是[-1,1]。但是在DirectX中，z分量的范围会是[0,1]。
+                    Unity使用的是OpenGL的齐次裁剪空间。
+                2.根据变换后的x和y坐标映射输出窗口的对应像素坐标
+                    Unity中，屏幕空间左下角的像素坐标是(0,0),右上角的像素坐标是(pixelWidth,pixelHeight)。
+                    由于当前x和y坐标都是[-1,1],因此，需要一个映射，缩放成屏幕像素:
+                    齐次除法后，顶点的坐标为pos=(x/w,y/w,z/w,w)
+                    裁剪空间坐标和屏幕映射的过程为：
+                        假如a在[-1,1]范围内，为了使其范围到[0,1],使用
+                            b=a·0.5+0.5
+                    所以：
+                        Screen(x)=((clip(x)/clip(w))·0.5+0.5)·pixelWidth
+                        Screen(y)=((clip(y)/clip(w))·0.5+0.5)·pixelHeight
+
+                        Screen(x)=(clip(x)/clip(w)+1)·(pixelWidth/2)
+                        Screen(y)=(clip(y)/clip(w)+1)·(pixelHeight/2)
+
+                    clip(z)/clip(w)会直接保存进深度缓冲中,作为深度缓存。
+                    clip(w)不变，在后续的工作中起到其他重要的作用。
+        6.总结    
+            渲染流水线中顶点的空间变换流程：
+                        
+                                        模型空间
+                                            |
+                                            |       模型变换    ---
+                                            ↓                     |
+                                        世界空间                  |
+                                            |                     |
+                                            |       观察变换    --|--- MVP矩阵
+                                            ↓                     |
+                                        观察空间                  |
+                                    (以摄像机为原点)              |
+                                            |                     |
+                                            |       投影变换    ---
+                                            ↓
+                                        裁剪空间
+                                (裁剪图元，并为投影做准备)
+                                            |
+                                            |       屏幕映射
+                                            ↓
+                                        屏幕空间
+                            (xy坐标对应屏幕上的2D像素坐标)
+    7.法线变换
+        *法线*(*normal*)，也被称为*法矢量*(*normal vector*)。
+        在变换顶点信息的时候，顶点中的法线需要做特殊处理。
+----------->page86
+            
+                    
+                        
 
 
 <<Unity Shaders and Effects Cookbook>>                                                           
