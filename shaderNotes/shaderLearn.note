@@ -1732,6 +1732,59 @@ Note:上面的测试顺序并不是唯一的。
                         }
 6.Unity Shader
 ---------------->page 100
+7.Unity Shader 其他
+    1.数值精度类型
+        类型                            精度
+        float                   最高精度的浮点值。32位。
+        half                    中等精度的浮点值。16位，精度范围是-60,000~+60,000
+        fixed                   最低精度的浮点值。11位，精度范围是-2.0~+2.0
+    2.BRDF(Bidirectional Reflectance Distribution Function)
+    3.兰伯特定律(Lambert's law)
+        反射光线的强度与表面法线和光源方向之间的余弦值成正比：
+            C(diffuse)=(C(light)·M(diffuse))max(0,n·I)
+    4.半兰伯特模型
+        在兰伯特光照模型的基础上，进行了简单的修改，称为半兰伯特光照模型：
+            C(diffuse)=(C(light)·M(diffuse))(α(n·I)+β)
+        绝大多数情况下，α和β都是0.5,即：
+            C(diffuse)=(C(light)·M(diffuse))(0.5(n·I)0.5)
+    5.*纹理名_ST*
+        Unity中，使用*纹理名_ST*的方式来获取材质中的某个纹理，其中ST是缩放(scale)和平移(translation)的缩写。
+        在Unity的材质中，可以调节纹理的平铺(缩放)，和偏移(平移)属性。
+        其中_xxx_ST.xy存储缩放值，_xxx_ST.zw存储偏移值
+    6.*多级渐远*(*mipmapping*)技术
+        mip是拉丁文"multum in parvo"的缩写，意思是"在一个空间中有许多东西"
+        纹理生成mipmpas，在存储空间上，通常会多占33%的内存空间。
+    7.Filter Mode   滤波模式
+        Point:最邻近(nearest neighbor)滤波，在放大或缩小是，采样像素数目通常只有一个。因此，图像看起来会有像素风格的效果。
+        Bilinear:线性滤波，对于每个目标像素，会找4个邻近像素，进行线性插值混合后得到最终像素。因此，图像看起来像被模糊了。
+        Trilinear:和Bilinear几乎一样，但是，还会再多级渐远纹理之间进行混合。
+    8.*凹凸映射*(*bump mapping*)
+        使用一张纹理来修改模型表面的法线。两种方法：
+            *高度纹理*(*height map*):模拟表面位移,得到一个修改后的法线值。也叫*高度映射*(*height mapping*)
+            *法线纹理*(*normal map*):直接存储表面法线。又叫*法线映射*(*normal mapping*)
+    9.语义SV
+        DirectX10以后，有了的一种新的语义类型————*系统数值语义*(*system-value semantics*)。这类语义以SV(*系统数值* *system-value*)开头
+        SV语义在渲染流水线中有特殊的含义。
+        SV_POSITION:    修饰顶点着色器的输出变量pos,表示了pos包含了可用于光栅化的变换后的顶点坐标（即齐次裁剪空间中的坐标）。
+        SV_Target:      
+    10.Unity支持的语义
+        1.从*应用阶段*传递模型数据给*顶点着色器*时，Unity支持的常用语义:
+            语义                    描述
+            POSITION                模型空间中的顶点位置，通常是float4类型
+            NORMAL                  顶点法线，通常是float3类型
+            TANGENT                 顶点切线，通常是float4类型
+            TEXCOORDn               该顶点的纹理坐标，TEXCOORD0表示第一组纹理坐标，依次类推。通常是float2或float4类型
+            COLOR                   顶点颜色，通常是fixed4或float4类型
+        2.从*顶点着色器*传递数据给*片元着色器*时，Unity支持的常用语义
+            语义                    描述
+            SV_POSITION             裁剪空间中的顶点坐标，结构体中必需包含一个用该语义修饰的变量。等同于DirectX9中的POSITION,但是最好使用SV_POSITION
+            COLOR0                  通常用于输出第一组顶点颜色，但不是必需的
+            COLOR1                  通常用于输出第二组顶点颜色，但不是必需的
+            TEXCOORD0~TEXCOORD7     通常用于输出纹理坐标，但不是必需的
+        3.片元着色器输出时Unity支持的常用语义
+            语义                    描述
+            SV_Target               输出值将会存储到渲染目标(render target)中。等同于DirectX9中的COLOR语义，但是最好使用SV_Target
+
 <<Unity Shaders and Effects Cookbook>>                                                           
 note:很好的书。不是按照基础→应用的方式讲过的。按照应用→原理方式讲述。讲解了创建着色器和后期特效模板测试结束。与应用结合紧密。
         
