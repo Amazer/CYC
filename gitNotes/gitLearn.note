@@ -48,6 +48,7 @@
     !! --　很重要，如果没有--，命令会变为“切换到另一个分支”
 8.删除文件
     rm filename         在文件管理器中删除文件
+    rm -r fileDir       递归删除文件夹中的内容
     git rm -- filename  将删除修改提交到暂存区
     git commit -m 'xx'  将修改提交到版本库
 
@@ -231,6 +232,10 @@
                 使用git check-ignore命令检测忽略规则
                 eg. git check-ignore -v app.class
             3.把.gitignore文件也提交到git
+                eg.  .gitignore 内容为:
+                     .vs
+                     *.log
+                     *.idb
         3.强制添加一个文件到git
         git add -f filename
         不需要从头写.gitignore文件，GitHub已经为我们准备了各种配置文件，只需要组合一下就可以使用了。所有配置文件可以直接在线浏览：https://github.com/github/gitignore
