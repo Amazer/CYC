@@ -12,7 +12,7 @@
     1.shaderlab 
 
     Transform,TexGen,Lighting                   (Early-Z技术)       Texturing Fog
-                                ------>  Culling DepthTest  ----->                  ----->  Alpha Test ------> Blending
+                                ------>  Culling, DepthTest  ----->                  ----->  Alpha Test ------> Blending
     Vertex Shader                                                   Fragment Shader 
     
     2.图形硬件流水线
@@ -1501,7 +1501,7 @@ Note:上面的测试顺序并不是唯一的。
                             正割:secθ=1/(cosθ) 
                             余割:cscθ=1/(sin) 
                             余切:cotθ=(cosθ/sinθ)=(cscθ/secθ)
-                        note:这里的投影矩阵是以Unity中的坐标系为参考的，即观察空间为右手坐标系，使用列矩阵在矩阵右侧进行相乘 且变换后，z分类范围在[-w,w]之间。
+                        note:这里的投影矩阵是以Unity中的坐标系为参考的，即观察空间为*右手坐标系*，使用*列矩阵*在矩阵右侧进行相乘 且变换后，z分类范围在[-w,w]之间。
                         note:在DirectX中，变换后z分类的范围是在[0,w]之间，因此投影矩阵也不一样。
                     顶点和投影矩阵相乘，得到顶点在裁剪空间中的位置：
                         P(clip) = M(frustum)·P(view)
