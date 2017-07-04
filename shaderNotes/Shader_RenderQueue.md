@@ -50,8 +50,16 @@
 
 
 ##### 3.深入理解Shader的渲染
- - ZTest、ZWrite   
- - AlphaTest、Blend
- - 渲染顺序
+ - 渲染顺序(Queue)
+     > shader按照Queue序列进行操作，即，先操作 queue值小的，后操作queue大的。
+     > 在Unity Shader中，表现为 subShader的Tags{"Queue"="..."}。
+ - ZTest
+     > Unity Shader中，如果没有指定，默认是ZTest LEqual
+     > 如果深度测试没有通过，会直接丢弃掉片元；否则，进入下一步，是否写入深入值
+ - ZWrite   
+     > 如果打开了深度写入(Unity中默认是打开的),会将片元的深度值写入深度缓冲区；
+     > 如果关闭了深度写入(ZWrite Off),则不会讲片元写入深度缓冲区。
+     > 之后，进行下一步,混合操作
+ - Blend(混合)
 
 
