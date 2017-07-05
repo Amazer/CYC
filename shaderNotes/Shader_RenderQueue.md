@@ -51,15 +51,6 @@
 
 
 ##### 3.深入理解Shader的渲染
-<<<<<<< HEAD
- - ZTest、ZWrite   
- - AlphaTest、Blend
- - 渲染顺序
-
-
-=======
-=======
->>>>>>> 2a9d0012065c8b13fd65cd651b156ce8179f13cf
  - 渲染顺序(Queue)
      > shader按照Queue序列进行操作，即，先操作 queue值小的，后操作queue大的。
      > 在Unity Shader中，表现为 subShader的Tags{"Queue"="..."}。
