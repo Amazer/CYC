@@ -120,7 +120,12 @@
     > 因为默认的ZTest 是LEqual 小于或者等于，所以，所有片元的ZTest都会通过。
     > 那么，渲染顺序就是材质的queue的顺序。
     > 所以，此时，可以通过修改材质的queue值，来将某个shader的渲染放到两个Panel之间
-      
+ 
+
+ - 总结
+    > 1.用远关注深度值，也即transform.position.z
+    > 2.如果z值相同， 修改queue
+    > 3.如果z值不同，ZTest会先过滤
       
       
       
