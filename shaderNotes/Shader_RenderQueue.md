@@ -3,6 +3,7 @@
 ##### 1.使用NGUI的过程中，有一个具有**半透明**效果的特效，想显示在Panel_A和Panel_B中间。
 
         效果如下图所示：
+![](img/test2.jpg)
         
   - 实现原理:
   
@@ -73,42 +74,24 @@
       > ZTest如果不通过，也就是说，被前面的遮挡着，片元就不再往下进行了
       > ZTest通过的情况下，
 
-      ```
-      Queue --> ZTest --> ZWrite
-                  
-                                      开始深度测试                            
-                                           |
-                              否           ↓
-                      ----------- 是否开启了深度测试
-                      |                    |
-                      |                    |  是
-                      |                    ↓
-                      |         比较该片元的深度值和已经
-                      |         存在于深度缓冲区中的深度值
-                      |                    |
-                      |                    |
-                      |                    ↓
-                      |             得到深度测试结果
-                      |                    |
-                      |                    ↓              否
-                      |             是否通过了深度测试 ------------------
-                      |                    |                            |            
-                      -------------------> |  是                        |
-                                           ↓                         舍弃该片        
-                                       是否开启了     否                |            
-                                        深度写入   -------------        |
-                                           |                   |        | 
-                                           | 是                |        | 
-                                           ↓                   |        | 
-                                       将深度值写              |        | 
-                                      入深度缓冲区             |        |
-                                            |                  |        |
-                                            | <-----------------        |
-                                            ↓                           |
-                                      深度测试结束  <--------------------            
+```flow
+st=>start: 开始深度测试
+e=>end: 深度测试结束
+compareDepth=>operation: 比较片元深度值,得到深度测试结果
+isPassZTest=>condition: 是否通过了深度测试
+isZWriteOn=>condition: 是否开启了深度写入
+writeZDepth=>operation: 将深度值写入深度缓冲区
+dropFragment=>operation: 舍弃该片元
+over=>operation: 结束
+st->compareDepth->isPassZTest(yes)->isZWriteOn(yes)->writeZDepth->e->e
 
-      ```
-      > 是否开启了ZWrite影响了下一个物体渲染时候的深度测试是否能够沟通
+isPassZTest(no)->dropFragment->e->e
+
+isZWriteOn(no)->e
+
+```
+
+ > 是否开启了ZWrite影响了下一个物体渲染时候的深度测试是否能够通过
 
 
   - 开启混合的Shader，ZWrite开启和关闭的必要性
@@ -123,31 +106,7 @@
  
 
  - 总结
-    > 1.用远关注深度值，也即transform.position.z
+    > 1.永远关注深度值，也即transform.position.z
     > 2.如果z值相同， 修改queue
-    > 3.如果z值不同，ZTest会先过滤
-      
-      
-      
+    > 3.如果z值不同，ZTest会先过滤,所以调整前后位置
 
-       ```flow
-       st=>start: 测试
-       e=>end
-       op=>operation: ZTest(深度测试)
-       cond=>condition: Yes or No?
-
-       st->op->cond
-       cond(yes)->e
-       cond(no)->op
-       ```
-
-```flow
-st=>start: Start
-e=>end
-op=>operation: My Operation
-cond=>condition: Yes or No?
-
-st->op->cond
-cond(yes)->e
-cond(no)->op
-```
