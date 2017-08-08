@@ -1,0 +1,23 @@
+define:MB->MonoBehavior    
+
+0.找到NGUI中效率低下的部分
+1.NGUI UIPanel相关框架
+    1.UIPanel
+            ->LateUpdate
+                    UIPanel.UpdateSelf   -> UpdateWidgets    -> Widget.UpdateGeometry                                                        
+                                                    -> FillAllDrawCalls() / FillDrawCall()
+                    UIPanel.UpdateDrawCalls
+        UIPanel->Widgets
+                    ->DrawCalls
+        DrawCall < -- >UIGeometry
+
+     2.UIDrawCall
+             -> drawCall=UIDrawCall.Create(UIPanel,Mat,Tex,Shader)  -> GetComponent<UIDrawCall>()
+
+
+
+2.继承和包含关系
+    UIRect -> 子类UIPanel
+           -> 子类UIWidget -> 包含一个UIDrawCall(MB)
+                           -> 包含一个UIGeometry
+
