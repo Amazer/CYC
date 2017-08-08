@@ -1,9 +1,15 @@
 define:MB->MonoBehavior    
 
-0.找到NGUI中效率低下的部分
+0.找到NGUI中效率低下的部分和频繁GC的部分
 1.NGUI UIPanel相关框架
-    1.UIPanel
-            ->LateUpdate
+    1.继承和包含关系
+        UIRect -> 子类UIPanel
+               -> 子类UIWidget -> 包含一个UIDrawCall(MB)
+                               -> 包含一个UIGeometry
+        UIAnchor(野生？)
+
+    2.UIPanel
+        ->LateUpdate
                     UIPanel.UpdateSelf   -> UpdateWidgets    -> Widget.UpdateGeometry                                                        
                                                     -> FillAllDrawCalls() / FillDrawCall()
                     UIPanel.UpdateDrawCalls
@@ -11,13 +17,41 @@ define:MB->MonoBehavior
                     ->DrawCalls
         DrawCall < -- >UIGeometry
 
-     2.UIDrawCall
-             -> drawCall=UIDrawCall.Create(UIPanel,Mat,Tex,Shader)  -> GetComponent<UIDrawCall>()
+        UIPanel是UIWidget和UIDrawCall的manager
 
+    3.UIWidget
+        -> 生成 UIGeometry
+        -> 包含一个 UIDrawCall
+        -> raycastDepth -> mDepth + panel.depth * 1000
+        -> UpdateGeometry 
+        -> WriteToBuffers -> geometry.WriteToBuffers
+    4.UIGeometry
+        -> verts    Widget未变换之前的顶点位置
+        -> uvs      Widget的纹理坐标(对应verts的纹理坐标)      
+        -> cols     顶点颜色
+        -> mRtpVert 相对于panel的顶点位置(以及相对的Normal,tangent)
+        -> ApplyTransform (Matrix4x4 widgetToPanel) 对原始顶点位置进行位置变换，添加到mRtpVert列表中
+        -> WriteToBuffers (verts,uvs,cols,nors,tans) 将UIGeometry已经变换的verts，uvs,nors,tans写入到函数参数中
+                                                     (注意，相当于是读取Geometry的数据内容)
+    5.UIDrawCall (MB)
+        -> drawCall=UIDrawCall.Create(UIPanel,Mat,Tex,Shader)  -> GetComponent<UIDrawCall>()
+        -> 重要成员变量
+            Material        mMaterial       :Material used by this screen??
+            Texture         mTexture        :Main texture used by the material.
+            Shader          mShader         :Shader used by the dynamically created material
+            Mesh            mMesh           :First generated mesh
+            MeshFilter      mFilter         :Mesh filter for this draw call
+            MeshRenderer    mRenderer       :Mesh renderer for this screen
+            Material        mdynamicmat     :Instantiated material, Dynamically created material used by the draw call to 
+                                             actually draw the geometry
 
+            Clipping    mCliping (clip mode)
+            Vector4     mClipRange
+            Vector2     mClipSoft
 
-2.继承和包含关系
-    UIRect -> 子类UIPanel
-           -> 子类UIWidget -> 包含一个UIDrawCall(MB)
-                           -> 包含一个UIGeometry
-
+        -> renderQueue -> mDynamicMat.renderQueue=value 设置材质的渲染序列
+        -> CreateMaterial   : Create an appropriate material for the draw call
+                            -> Shader.Find (shader/softShader/AlphaShader等)
+                            -> mDynamicMat = new Material( mMaterial/shader) 必会创建一个新材质
+        -> RebuildMaterial  -> Destory旧的mDynamicMat,并且创建一个新的mDynamicMat
+                            -> 赋值renderQueue,mainTexture,mRenderer赋值shareMaterials=new Material[] {mDynamicMat}
