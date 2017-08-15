@@ -55,3 +55,18 @@ define:MB->MonoBehavior
                             -> mDynamicMat = new Material( mMaterial/shader) 必会创建一个新材质
         -> RebuildMaterial  -> Destory旧的mDynamicMat,并且创建一个新的mDynamicMat
                             -> 赋值renderQueue,mainTexture,mRenderer赋值shareMaterials=new Material[] {mDynamicMat}
+        -> Set  : set the draw call's geometry
+                -> 检测数据是否可以用,顶点数据要少于65000
+                -> 创建mesh. mMesh.MarkDynamic() -> 填充mesh的vertices,uvs,cols;norms,tans
+                -> 初始化mFilter,mRenderer
+                -> 更新材质（如果没有就创建）
+
+        -> GenerateCachedIndexBuffer    : 返回顶点列表（有缓存从缓存中读取，没有缓存生成缓存）
+        -> OnWillRenderObject           : 设置了mDynamicMat的mainTextureOffset,mainTextureScale;
+                                          重要的是，设置了_ClipSharpness(裁剪)
+        -> OnEnable                     : 每次OnEnable,mRebuildMat=true,即每次开关都要重建材质
+        -> OnDisable                    : 每次都销毁mDynamicMat
+2.世界坐标系与NGUI坐标系(长度/像素的转换)
+    UIWidget的width，与世界坐标系中长度的转换
+3.自适应的处理
+4.SoftClip Shader
