@@ -1116,11 +1116,11 @@ Note:上面的测试顺序并不是唯一的。
                                         kf(x)=f(kx)
                 *缩放*(*scale*)就是一种*线性变换*。eg.f(x)=2x，可以表示一个大小为2的统一缩放。
                 *旋转*(*rotation*)也是一种*线性变换*。
-            .*放射变换*(*affine transform*)
+            .*仿射变换*(*affine transform*)
                 对于线性变换来说，如果我们要对一个三维的矢量进行变换，那么仅仅使用3x3的矩阵就可以表示所有的线性变换。
                 但是，如果要考虑到平移变换，eg.f(x)=x+(1,2,3),将x平移(1,2,3),就不是一个线性变换。
-                *放射变换*就是合并线性变换和平移变换的变换类型。
-                *放射变换*可以使用一个4x4的矩阵来表示。为此，也需要*把矢量扩展到四维空间*下。这就是*齐次坐标空间*(*homogeneous space*).
+                *仿射变换*就是合并线性变换和平移变换的变换类型。
+                *仿射变换*可以使用一个4x4的矩阵来表示。为此，也需要*把矢量扩展到四维空间*下。这就是*齐次坐标空间*(*homogeneous space*).
 
             图形学中常见的变换矩阵名称和他们的特效：
 
@@ -1490,7 +1490,9 @@ Note:上面的测试顺序并不是唯一的。
                         nearClipPlaneHeight=2·Near·tan(FOV/2)
                         farClipPlaneHeight=2·Far·tan(FOV/2)
                     视锥体的横向width由通过*摄像机的横纵比*(*Aspect*)得到。
-                    Unity中摄像机的横纵比由Game视图的横纵比和ViewPort Rect中的W和H属性共同决定：
+                    Unity中摄像机的横纵比Aspect由Game视图的横纵比决定的.
+                    Unity Camera的Rect中,x,y表示范围为[0,1]归一化坐标，w,h表示范围[0,1]相机视口的横纵比例.
+                    note:(Unity文档中表示,自动获取Aspect=Screen.w/Screen.h,如果手动改变了aspect,需要调用camera.ResetAspect)
                         Aspect=(nearClipPlaneWidth/nearClipPanelHeight)
                         Aspect=(farClipPlaneWidth/farClipPanelHeight)
                     Unity中，根据已知的Near、Far、FOV和Aspect的值来确定投影矩阵：
