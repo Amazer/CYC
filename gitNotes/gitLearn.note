@@ -98,7 +98,7 @@
         git checkout dev
     2.git branch 查看当前所有分支
     3.切换分支
-        git branch <分支名> 切换到分支
+        git checkout <分支名> 切换到分支
     4.合并分支
         git merge 合并指定分支到 当前分支 
     5.删除分支：

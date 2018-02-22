@@ -1,0 +1,579 @@
+一、基础
+1.python文件
+    .pyc    python -m py_complie  xxx.py         提高加载速度
+    .pyo    python -o -m py_complie xxx.py       优化的py文件
+2.unicode编码设置
+    中文字符在python环境下遇到 UnicodeDecodeError,为了使用unicode编码，在代码的第一行添加注释：
+    # -*- coding:utf-8 -*-
+
+3.List
+    .0 用[]表示
+    .1 List的倒序访问
+        从-1开始，表示倒数第一。eg. List[-1]
+
+    .2 List添加新元素
+        1.使用list.append(xxx),将元素添加到list的末尾
+        2.使用list.insert(index,xxx),将元素添加到指定的index位置
+    .3 List删除元素
+        1.使用list.pop()方法，删除列表中的最后一个元素
+        2.使用list.pop(index)方法，删除列表中指定index位置的元素
+    .4 List替换元素
+        指定元素赋值，也可以倒序指定
+        list[3]=xxx
+        list[-1]=xxx
+
+4.tuple
+    .0 用()表示，并且一旦创建完毕，不能再修改
+    .1 因为不能修改，所有，没有append、insert、pop方法
+    .2 可以使用index访问:
+        t[index]
+        t[-1] 倒序访问
+    .3 创建单元素tuple的时候，为了避免和()优先级混淆，最后加一个","
+        t=(1)  #表示t=1,()是优先级
+        t=(1,) #表示了t是个tuple
+    .4 '可变'tuple:tuple中添加List作为子元素,改变子元素List是可以的
+        eg. t=('a','b',[1,2])
+            list=t[2]
+            list[0]='x'
+            list[1]='y'
+            结果t=('a,'b',['x','y'])
+
+5.python的缩进标准
+    .0 具有相同缩进的代码被视为同一个代码块
+    .1 4个空格为一次缩进，不要使用tap,更不要混合tab和空格
+
+6.if语句,if else 语句,if elif else语句
+    elif 是 else if
+    .0 if、elif、else后都需要有冒号"*:*"
+    eg.1. 
+        if condition:
+            xxxx
+            xxxx
+    eg.2.
+        if condition:
+            xxx
+            xxx
+        else:
+            yyy
+            yyy
+    eg.3.
+        if condition1:
+            xxx
+        elif condition2:
+            yyy
+        else:
+            zzz
+
+7.for循环 while循环
+    格式：
+    *for* xxx *in* x *:*
+
+    *while* xxx *:*
+
+8.*break*退出循环,*continue*继续循环
+
+9.dict 字典
+    .0 *{}*表示，其中的KeyValuePair用*:*隔开
+    .1 len(x) 计算任意一个集合的大小
+    .2 d[*key*]获取元素value
+    .3 *in*操作符判断key是否存在
+        if 'paul' *in* d:
+            print d['paul']
+    .4 dict.*get(*xxx*)*获取value，如果key不存在，返回None
+    .5 遍历dict时候，获得的是dict的*key*,使用*in*操作符
+        eg. for x in d:
+                print x     # x是keyValuePair中的key
+    .6 dict.*values()* 获取dict的所有value的list,对应的， dict.*itervalues()* 迭代获取每一个value
+    .7 dict.*items()*     获取dict的键值对列表(包含了tuple的list),对应的dict.*iteritems()*迭代每一个键值对（tuple）
+
+10.set集合
+    .0 set(List)调用set()方法，并传入一个list
+        eg. list=[1,2,3]
+            s=set(list)
+    .1 set没有重复元素
+    .2 len(s)获取set的元素个数
+    .3 *in*操作符判断集合中是否有set
+        eg. if 'abc' in s:
+                xxx
+    .4 *for* x *in* set:进行对set的遍历
+    .5 .add(x)添加元素，.remove(x)移除元素
+
+11.函数
+    .0 python官方网站文档地址：
+        http://docs.python.org/2/library/functions.html
+        (查看abs函数)http://docs.python.org/2/library/functions.html#abs
+    .1 在交互式命令行中*help(*abs*)*查看帮助信息
+    .2 常用函数
+        abs()
+        cmp(x,y)    比较函数，x<y->-1,x==y->0,x>y->1
+        int(x)      类型转换函数，将x转换为整数
+        str(x)      类型转换函数，将x转换为str
+        sum(list)   接受一个列表作为参数，并且计算列表中所有元素之和
+        upper()     字符串的str.upper()方法可以把字母变成大写字母
+        range(start,end) 快速创建一个从start到end的列表,包含start,不包含end.[start,end)
+        range(start,end,x) [start,end)每x个取一个
+        enumerate() 迭代函数
+        zip()       把两个list的每个对应元素组成一个tuple,变成一个list.eg. zip(l1,l2),得到的是一个合并成tuple后的List
+                    eg. zip([1,2,3],['a','b','c']) 得到[(1,'a'),(2,'b'),(3,'c')]
+        join()      把一个list拼接成一个字符串,str.join(str2)
+        isinstance(x,str) 判断变量x是否为一个字符串
+        sorted(List,cmpFunction)    用cmpFunction排序列表。
+        math包中的函数：
+            math.sin()
+            math.cos()
+            math.sqrt()
+
+        %进行格式化，用指定参数代替%s(字符串)
+
+    .3 定义函数，格式：
+        def 函数名(参数):
+            return
+        return None可以简写为return
+    .4 函数返回多个值，实际上是返回一个tuple,括号可以省略。多个变量可以同时接收一个tuple,按位置赋值给对应的值
+        eg. def move(x,y):
+                x+=1
+                y+=1
+                return x,y
+            a,b=move(1,2)
+    .5 支持定义默认参数，和c#一样
+    .6 定义可变参数 *args
+        可变参数前有个*号，可以传入0个或多个
+        原理:将多个参数组装成一个tuple,在函数内部，直接把args当成tuple使用就可以了
+
+12.list和tuple的切片":"
+    .0 L[0:3]  取L中的第0个到第三个元素,可以省略开头和结尾.
+        eg. L[:3]       从开头取
+            L[0:]       取值到结尾
+            L[:]        从开头渠道结尾,实际上是赋值出了一个新的list
+    .1 指定第三个参数，表示每几个取第一个元素. 
+        eg.L[::2]   从头开始到结尾，两个元素取一个元素
+           L[5:50:4] 从index=5开始到index=50,每4个元素取一个
+    .2 倒序切片 L[x:y:Z]  [x,y)
+        note:倒数第一个元素的索引是-1.倒序切片*包含*起始索引，*不包含*结束索引
+        eg.L[-2:] 倒数两个元素
+           L[:-2] 0到倒数两个
+           L[-3:-1] 倒数第三个到倒数第一个,不包含倒数第一个
+           L[-4:-1:2] 倒数第四个到倒数第一个（不包含倒数第一个），每2个取一个
+
+13.字符串切片":"
+    .0 字符串'xxx'和Unicode字符串u'xxx'也可以看成是一种list,每个字符就是一个元素
+    .1 按照list的切片方式切片
+
+14.迭代
+    .0 python中，使用*for..in..:*可以迭代的有：
+        .0 有序集合：list,tuple,str,unicode
+        .1 无序集合：set
+        .2 无序集合并且具有key-value对：dict
+    .1 python中，迭代永远是取出元素本身，而不是指向元素的索引
+    .2 enumerate() 函数获取元素的index和name
+        eg. for index,name in enumerate(L):
+        index和name接收了索引和value
+        实际上，enumerate()函数把元素转换成了一个tuple返回。即：
+        eg. for t in enumerate(L):
+                index=t[0]
+                name=t[1]
+
+15.生成列表
+    .0 在列表中加入语句,实际上是将for..in..每次的返回值进行操作
+        eg. [x*x for x in range(1,11)]  生成一个从1到10的平方的列表
+
+        请利用列表生成式生成列表 [1x2, 3x4, 5x6, 7x8, ..., 99x100]
+        提示：range(1, 100, 2) 可以生成list [1, 3, 5, 7, 9,...]
+        答案：print [x*(x+1) for x in range(1,100,2)]
+    .1 在for..in..后可以添加if判断
+        实际上是对for..in..每次的返回结果的判断.为true才进行最前面的语句
+    .2 总结就是：
+        [操作每次迭代的语句 for..in.. if条件]
+    .3 for循环可以嵌套多层for循环
+        for循环可以嵌套，因此，在列表生成式中，也可以用多层 for 循环来生成列表。
+        对于字符串 'ABC' 和 '123'，可以使用两层循环，生成全排列：
+            >>> [m + n for m in 'ABC' for n in '123']
+            ['A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3']
+        翻译成循环代码就像下面这样：
+            L = []
+            for m in 'ABC':
+                for n in '123':
+                    L.append(m + n)
+
+12.引入包
+    import 引入包名
+
+二、进阶
+    1.函数式编程
+    2.模块
+    3.面向对象编程
+    4.定制类
+
+1.函数式编程 functional -- 高阶函数
+    .0 高阶函数
+        可以将函数名作为函数的参数
+    .1 map()函数
+        python中的map()函数接收一个函数名和一个list,并对list中的每一个元素进行f操作，最后返回一个list
+        def map(f,list):
+            l=[]
+            for x in list:
+                l.append(f(x))
+            return l
+    .2 reduce()函数
+        python中的reduce(f,list)函数中的f必须接收两个参数。第一个从list中拿两个元素进行f变换，之后用前一个f变换的结果作为第一个参数，再从list中取一个元素作为第二个参数。
+        reduce(f,list,x)可以接收3个参数，第三个参数x表示为初始值。即第一次的f运算时,第一个参数是x,第二个参数是list中的第一个元素
+    .3 filter()函数
+       filter(f,list),将f运算结果为True的组成list返回，过滤掉为False的结果 
+    .4 sorted()函数
+        sorted(list,f),f是一个比较函数,参数为待比较的两个数x和y。如果x应该排在y前面，返回-1，否则返回1，相等返回0.
+            正向从小到大的排序是：
+                if x>y:
+                    return 1
+                elif x<y:
+                    return -1
+                else:
+                    return 0
+    .5 在函数中返回一个函数
+        def f(abc):
+            def g():
+                abc...
+                xxxx
+            return g
+        作用是，可以延迟执行函数,还可以把参数隐藏起来
+    .6 闭包
+        在函数中定义的函数不能被外部调用
+        闭包的特点是返回的函数还引用了外层函数的局部变量，所以，要正确的使用闭包，就要确保引用的局部变量在函数返回后不能变。
+        任务:返回闭包不能引用循环变量，请改写count()函数，让它正确返回能计算1x1、2x2、3x3的函数。
+        分析：
+            考察下面的函数 f:
+                def f(j):
+                    def g():
+                        return j*j
+                    return g
+            它可以正确地返回一个闭包g，g所引用的变量j不是循环变量，因此将正常执行。
+            在count函数的循环内部，如果借助f函数，就可以避免引用循环变量i。
+        答案：
+            def count():
+                fs = []
+                for i in range(1, 4):
+                    def f(j):
+                        def g():
+                            return j*j
+                        return g
+                    fs.append(f(i))
+                return fs
+            f1, f2, f3 = count()
+            print f1(), f2(), f3()
+    .7 匿名函数
+        定义匿名函数 lambda x:... ,lambda是关键字，x表示函数参数
+        只能有一个表达式，不写return，返回值就是该表达式的结果
+
+2.装饰器    @decorator
+    .0 作用
+        定义了一个函数
+        想在运行时动态增加功能
+        又不想改动函数本身的代码
+        @new_fn                                def f1(x):
+        def f1(x):              --->                return x*2
+            return x*2                          f1=new_fn(f1)
+        隐藏掉了原来的f1,直接用新的f1代替
+        作用：
+            . 简化代码
+                打印日志:@log
+                检测性能:@performance
+                数据库事务:@transaction
+                URL路由:@post('/register')
+    .1 无参数的decorator
+        decorator本质上就是一个高阶函数，它接收一个函数作为参数，然后返回一个新函数
+        python提供了@语法，可以避免手动编写f=decorator(f)
+        可以使用
+            *args
+            **kw
+        来保证任意个数的参数总是能够正常调用
+        基本结构为：
+        def fn_decorator(fn):
+            def wrapper(*args,**kw):
+                pass
+                f=fn(*args,**kw)
+                pass
+                return f
+            return wrapper
+        使用的时候，@fn_decorator
+
+    .2 带参数的decorator
+        在fn_decorator外面再包一层，来接收参数,基本结构为：
+        def xxx_func(args):
+            def decorator_xxxFunc(f):
+                def wrapper(*args,**kw):
+                    pass                    #在这里面可以对最外层的参数使用args
+                    fnew=f(*args,**kw)
+                    pass
+                    return fnwe
+                return wrapper
+            return decorator_xxxFunc
+    .3 完善decorator,使用*functools*复制属性
+        经过decorator之后的函数，变成了wrapper函数，属性也是wrapper。想要显示原有函数的信息，需要将原有函数的name和doc信息复制给wrapper:
+            wrapper.__name__=f.__name__
+            wrapper.__doc__=f.__doc__
+        可以使用functools自动化完成这个工作：
+            def fn_decorator(*fn*):
+                @*functools*.*wraps*(*fn*)
+                def wrapper(*args,**kw):
+                    pass
+                    f=fn(*args,**kw)
+                    pass
+                    return f
+                return wrapper
+        带参数的：
+            def xxx_func(args):
+                def decorator_xxxFunc(f):
+                    @*functools*.*wraps*(*f*)
+                    def wrapper(*args,**kw):
+                        pass                    #在这里面可以对最外层的参数使用args
+                        fnew=f(*args,**kw)
+                        pass
+                        return fnwe
+                    return wrapper
+                return decorator_xxxFunc
+
+3.偏函数 functools.partial
+    int2等于base=2的int函数
+        import functools
+        int2=functools.partial(int,base=2)
+    functools.partial可以把一个参数多的函数变成一个参数少的新函数，少的参数需要在创建时指定默认值
+    
+4.模块和包
+    .1 模块
+        .1 模块的名字就是python文件名的名字
+        .2 引用其他模块，用*import*语句
+        .3 使用其他模块的函数，需要添加模块名
+    .2 包
+        .1 包名就是文件夹的名字
+        .2 引用完整模块，用*import* *包名.模块名*
+        .3 包可以有多级
+        .4 包的文件夹中必须有*__init__.py*,有这个文件，python才会将这个文件夹当做一个包来处理
+    .3 起别名
+        使用form...import...as ...
+    .4 导入模块的几种方式
+        eg.导入os.path模块的几种方式
+        1.import os
+        2.import os.path
+        3.from os import path
+        4.from os.path import isdir,isfile      # 导入isdir函数和isfile函数
+    .5 动态导入模块
+        使用try...except语句，尝试导入失败后，在导入必然存在的包。导入失败的异常类型是ImportError
+        eg.
+            *try:*
+                form cStringIO import StringIO
+            *except ImportError:*
+                form StringIO import StringIO
+    .6 使用*__future__*
+        python的新版本会引入新功能，但是实际上在上一个老版本中就已经存在了。
+        要试用某一新特性，可以通过导入*__future__*模块的某些功能来实现
+        eg.在python2.7版本中导入3.x中的devision功能：
+            from __future__ import division
+        在Python 3.x中，字符串统一为unicode，不需要加前缀 u，而以字节存储的str则必须加前缀 b。
+
+5.安装第三方模块
+    .0 两种管理模块的软件
+        . easy_install
+        . pip               官方推荐的，已经内置到Python2.7.9中
+    .1 用pip安装模块
+        pip install web.py
+        pypi.python.org 搜索模块名字，试用pip install安装
+        
+6.面向对象
+    .0 定义类的关键字 class. python的编程习惯中，*类名*以*大写字母*开头
+        *class* ClassName*:*
+            pass
+    .1 实例创建，不需要new，直接*类名()*
+        c=ClassName()
+    .2 创建实例属性
+        python是动态语言，属性值不用定义，可以直接赋值。
+        eg. class Persion:
+                pass
+            min=Persion()
+            min.name='Xiao Ming'
+            min.birth='1990-1-1'
+    .3 初始化实例属性
+        .类的*__init__()*方法，在当实例被创建时，自动被调用
+        .*__init__()*方法的第一个参数必须是*self*,后续参数可以自由指定
+            class Persion(object):
+                def __init__(self,name,gender,birth):
+                    self.name=name
+                    self.gender=gender
+                    self.birth=birth
+            min=Persion('Min','Male','1991-1-1')
+        .**kw参数关键字，可以获取xxx='yyy'格式的参数列表,使用*setattr(self*,'attr_name','attr_value*)*给self设置属性
+                class Person(object):
+                    def __init__(self,name,gender,birth,**kw):
+                        self.name=name
+                        self.gender=gender
+                        self.birth=birth
+                        for k,v in kw.*iteritems()*:
+                            *setattr(self,k,v)*
+                xiaoming = Person('Xiao Ming', 'Male', '1990-1-1', job='Student')
+                print xiaoming.name
+                print xiaoming.job
+    .4 访问限制
+        .如果一个属性由*双下划线开头（__）*，该属性无法被外部访问.eg self.__job='Student',__job无法被外部访问
+        .如果一个属性以*__xxx__*的形式定义，是可以被外部访问的。但是这种类型在python中被称为特殊属性，有很多预定义的特殊属性可以使用。普通的定义不要定义成这种格式
+        .以*单下划线开头*的是属性*_xxx*可以被外部访问，但是按照习惯，不应该被访问
+    .5 类属性
+        .类属性可以直接定义。也可以动态定义.使用的时候，必须用*类名.属性名*.如果类属性是*__xxx*格式的，也是不能被外部访问的.
+            class Person:
+                address='China'
+                count=0
+                def __init__(self,name):
+                    self.name=name
+                    *Person.count*+=1
+            Persion.order=1
+        .当实例属性和类属性重命名时，实例属性优先级高
+    .6 实例方法。第一个参数永远是*self*.
+        在类内部调用实例属性和方法的时候，也需要加self.的开头
+    .7 实例方法也是属性,不加括号的调用返回的是函数对象. 使用types.MethodType()可以给实例动态添加方法.需要import types
+        另外，函数不需要传入self,但是方法一定要传入self
+            import types
+            def fn_get_grade(self):
+                if self.score >= 80:
+                    return 'A'
+                if self.score >= 60:
+                    return 'B'
+                return 'C'
+
+            class Person(object):
+                def __init__(self, name, score):
+                    self.name = name
+                    self.score = score
+
+            p1 = Person('Bob', 90)
+            p1.get_grade = types.MethodType(fn_get_grade, p1, Person)
+            print p1.get_grade()
+            # => A
+            p2 = Person('Alice', 65)
+            print p2.get_grade()
+
+            # ERROR: AttributeError: 'Person' object has no attribute 'get_grade'
+            # 因为p2实例并没有绑定get_grade
+    .8 定义类方法，需要在方法上添加*@classmethod*.类方法的第一个参数传入的是*类本身*，通常命名为*cls*
+        class Person(object):
+            count=0
+            *@classmethod*
+            def how_many(*cls*):
+                return cls.count        # 等于Person.count
+            def __init__(self,name):
+                self.name=name
+                Person.count+=1
+        print Person.how_many()
+7.类的继承
+    .0 继承的父类写到括号里面,在__init__()方法中调用*super(ChildClassName,self).__init__(args)*.其中self已经隐式传递了
+        class Student(Person):
+            def __init__(self,name):
+                super(Student,self).__init__(name)
+    .1 多态
+        .不需要override参数什么的。找方法的时候，先找自己的，没有的话再一层一层往上找
+        .动态语言调用实例方法，不检查类型，只要方法存在，参数正确，就可以调用.也就是说，只要有相同的方法，不管有没有继承，都可以假装是同一个类型调用
+    .2 多重继承
+        .父类用","隔开
+        .记得在__init__方法中调用super(SelfClassName,self).__init__()方法
+
+8.python中获取对象信息
+    .0 方法一：用isinstance(x,type)判断一个变量的类型
+    .1 方法二：
+        . 用*type()*函数获取变量的类型，返回一个*Type*对象.
+            eg. type(123)
+                <type 'int'>
+        . 用*dir()*函数获取变量的所有属性.dir()返回所有实例属性，包括特殊属性
+            eg. dir(123)
+        . 已知一个属性名称，要获取或者设置对象的属性，用*getattr()*和*setattr()*方法
+            getattr(obj,'attrName')     返回attrValue
+            setattr(obj,'attrName','attrValue')
+
+9.特殊方法
+    . 定义在class中
+    . 不需要手动调用,python中的某些函数会自动调用
+    . 编写用到的特殊方法
+    . 有关联性的特殊方法必须一起被实现
+    eg.
+        .0 __str__(),用于print
+        .1 __len__(),用于获取长度
+        .2 __cmp__(),用于比较
+    .0 __str__()方法和__repr__()方法.注意配置str()的使用。str(s)表示调用s.__str__()
+        __str__()是显示给用户看的，使用 print p 的时候，自动调用p.__str__()
+        __repr__()是给开发人员看的，调用 p 的时候，自动调用p.__repr__()
+        让__repr__方法也显示__str__的结果的偷懒方式是，类中让__repr__=__str__
+            class Person(object):
+                def __init__(self, name, gender):
+                    self.name = name
+                    self.gender = gender
+                def __str__(self):
+                    return '(Person: %s, %s)' % (self.name, self.gender)
+                *__repr__ = __str__*
+    .1 __cmp__()
+        .__cmp__(self,s)  __cmp__接收自己和另外一个实例作为参数
+        .int,str等内置类型进行sorted()进行排序时，会调用其内部的__cmp__方法
+        .对需要进行排序的实例，需要提供自己的特殊方法__cmp__()
+        .注意，可以结合cmp()函数的使用
+    .2 __len__(),获取长度
+        .len(s) 函数会调用s.__len__()方法
+        .__len__(self),记得方法必须传入self
+    .3 实现运算特殊方法 加__add__,减__sub__,乘__mul__,除__div__,实现了实例的加减乘除
+    .4 类型转换的特殊方法
+        int() : __int__()
+        float() __float__()
+    .5 get/set属性装饰器函数:*@property* 是get属性的，*@*attrValue*.setter*是set属性的。
+        eg.
+        @property
+        def score(self):
+            return self.__score
+        @score.setter
+        def score(self, score):
+            if score < 0 or score > 100:
+                raise ValueError('invalid score')
+            self.__score = score
+    .6 __slots__ 限制动态添加属性
+        .__slots__是指一个类允许的属性列表,是类的类属性
+            eg. __slots__=('name','gender','score')
+        .__slots__中定义了允许的属性后，如果访问和添加不在列表中的属性，会抛出AttributeError的异常
+        .__slots__的目的是限制当前所能拥有的属性，如果不需要添加任意动态的属性，使用__slots__也能节省内存
+        .__slots__会继承父类的__slots__。所以，在子类里面添加属性限制的时候，直接增加就可以了，不用再把父类的写一遍
+    .7 __call__可调用对象的方法
+        .实现__call__()方法后，一个类的实例也可以变成一个可调用对象
+        .实现__call__()方法后，就可以()调用了。
+        .__call__(self,params),__call__可以有多个参数
+
+10.装饰器
+    .0 作用域 LEGB:L>E>G>B
+        L:local 函数内部作用域
+        E:enclosing 函数内部与内嵌函数之间(闭包)
+        G:global 全局作用域
+        B:build-in 内置作用域 (python解释器默认的变量)
+    .1 *闭包* *Closure*
+        .0 内部函数中对enclosing作用域的变量进行引用，那么就称之为闭包
+        .1 函数实质与属性
+            . 函数式一个对象
+            . 函数执行完成后内部变量会回收
+            . 函数属性  (函数有属性值)  闭包元组*__closure__*
+            . 函数返回值
+        .2 闭包函数会将执行过程中使用到的enclosing value添加到函数的属性中(属性是元组，不会变) 闭包元组*__closure__*
+        .3 举个例子
+            def set_passline(passline):
+                def cmp(val):           # 每次set_passline(x),这里会将x作为cmp的属性值添加到cmp.__closure__中
+                    if val>=passline:
+                        print 'pass'
+                    else:
+                        print 'failed'
+                return cmp
+            f_100=set_passline(60)
+            f_150=set_passline(90)
+            f_100(89)
+            f_150(89)
+        .4 闭包作用：代码封装和代码复用
+    .2 装饰器 @deco. @deco会调用装饰. 对闭包的应用
+        . 用来装饰函数
+        . 返回装饰的函数
+            
+--------------------------------------------
+下一步：
+IO:             文件和Socket
+多任务:         进程和线程
+数据库：
+Web开发
+
+
+

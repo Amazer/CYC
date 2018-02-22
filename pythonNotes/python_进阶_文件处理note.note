@@ -1,0 +1,211 @@
+python进阶-文件处理
+0.大纲
+    .1 文件基本概念
+    .2 文件操作
+        打开文件
+        文件读写操作
+        文件指针
+        文件对象属性
+    .3 linux文件系统
+    .4 os模块的文件操作
+    .5 文件练习
+1.文件
+    . python中文件是文件对象
+    . linux文件：一切设备都可以看成文件，使用的操作都可以看做是对文件的操作
+        eg.磁盘文件，管道，网络Socket,外设等
+    . linux文件属性
+        . 用户属性
+        . 读写执行权限
+        . 一些命令
+            .*cat* fileName         :查看文件内容
+            .ls -l                  :列出文件以及文件的权限属性
+            . -rw-rw-r--
+              123456789A  
+              1:文件类型 -代表普通文件，d代表是目录
+              234|567|89A:每一组的三个位置分别代表分别是  是否可读(r) 是否可写(w) 是否可执行(e). -代表否
+              234:当前用户的权限
+              567:当前用户组的权限
+              89A:其他用户的权限
+            . *chmod* +x filename     :修改文件的权限，+x表示所有用户的权限都添加可执行
+    . 文件的打开和读写方式
+        .打开方式:open(name[,mode[buf]])
+            name:文件路径
+            mode:打开方式       
+                r   只读方式打开            文件必须存在
+                w   只写方式打开            文件不存在则*创建*文件,文件存在则*清空*文本内容
+                a   追加方式打开            文件不存在则*创建*文件
+                r+  读方式打开              可以读写        从开头写起，如果文件中开头有内容，会覆盖内容.
+                w+  写方式打开              可以读写        写文件内容会清空
+                a+  追加和读写方式打开
+                rb wb ab rb+ wb+ ab+        二进制方式打开
+            buf:文件缓冲大小
+        .读取方式
+            .read([size])   :读取文件（读取size个字节。默认去读全部）
+            .readline([size])   :读取一行
+            .readlines([size])  :读取完文件，返回每一行所组成的列表. 占内存.
+            .iter               :使用迭代器读取文件
+                f=open('xxx')
+                iter_f=iter(f)  #强制将f转换为迭代器类型
+                    迭代器调用next的时候，才会赌气下一行
+                for line in iter_f:
+                    print line
+        .写入文件(写到了文件缓冲中，没有到磁盘)
+            .write(str)     :将字符串写入文件
+            .writelines(sequence_of_strings)        : 写多行到文件。sequence_of_strings:字符串组成的列表,可迭代对象就行
+            .写到了写缓存，
+                .1 如果不主动调用f.close()或者f.flush()，write的内容是不会存储到磁盘上
+                .2 如果写入数据量大于写缓存，那么大于缓冲部分写缓存会同步到磁盘上,其他还在写缓冲
+        .关闭文件 .close()
+            . 将缓存同步到磁盘
+            . linux系统中每个进程打开文件的个数是有限的
+            . 打开文件数超过系统限制，打开文件会失败
+            . f.*fileno()*    打开的文件的number order,最大打开数是1024
+    . 文件操作指针
+        . 问题：
+            .1 写入文件后，必须打开才能读取写入内从
+            .2 读取文件后，无法重新再次读取读取过的内容
+            . 读和写文件内部指针移动
+        . seek(offset[,whence]) : 移动文件指针. 相对于whence移动offset位置
+            .offset         : 偏移量，可以为负数
+            .whence         : 偏移相对位置
+                . whence文件指针定位方式：
+                    . os.SEEK_SET   0   : 相对文件起始位置
+                    . os.SEEK_CUR   1   : 相对文件当前位置
+                    . os.SEEK_END   2   : 相对文件结尾位置
+                . f.*tell()*      :返回当前文件的偏移,int或者long,返回的是字节数
+                    eg.
+                        f=open("hello.txt",'r')
+                        f.tell()    # 0L
+                        f.read(3)   # 读3个字节，
+                        f.tell()    # 3L
+                        f.seek(0,os.SEEK_SET)   # 将文件指针移动到起始位置
+                        f.tell()    # 0L
+                        f.close()
+    . 文件对象属性
+        .0 file.fileno()        : 文件描述符（打开的number order）
+        .1 file.mode            : 文件的打开权限
+        .2 file.encoding        : 文件的编码格式
+        .3 file.closed          : 文件是否关闭
+    . python标准文件 (终端控制台)(需要导入sys  import sys)
+        .1 文件标准输入 :   sys.stdin
+            .type(sys.stdin)  # 返回值是个file,是个文件
+            .sys.stdin.fileno 是0 ，是控制台
+            .sys.stdin.read() 会无法退出
+            .a=raw_input(":") 接收一行输入，将输入内容返回给a.实际上是调用了sys.stdin.readline()
+            .sys.stdin.mode  是'r',只读
+        .2 文件标准输出 :   sys.stdout
+            . sys.stdout 也是一个文件
+            . sys.stdout.mode 是'w',只写
+            . sys.stdout.fileno 是1
+            . print() 调用了sys.stdout.write(),将内容打印到控制台
+        .3 文件标准错误 :   sys.stderr
+            . sys.stderr 也是一个文件
+            . sys.stderr.fileno 是2
+            . sys.stderr.mode 是'w',只写
+            . sys.stderr.write() 也会打印到控制台
+    . python文件命令行参数
+        . 文件的参数有sys模块的*sys.argv*属性提供，通过该属性可以得到命令行参数
+        . sys.argv 是字符串组成的列表
+            .eg 测试参数
+                import sys
+                if __name__='__main__':
+                    print len(sys.argv)
+                    for v in sys.argv:
+                        print v
+            .参数的第一个值是自己,之后才是自己输入的参数
+            .参数的len()是输入的参数+1 （因为第一个参数是自动加入的）
+    . python文件编码格式
+        . 问题
+            . 使用f.write(u'中文') 时候会报错,并没有将'中文'转成unicode
+            . 使用 s=*unicode.encode**(*u'中文',*'utf-8'**)*,得到转码后的字符串,再写入
+            . 转码写入后，在读取文件的时候，读到的是中文转码后的字符串
+        . 创建一个utf-8或者其他编码格式的文件
+            . 使用*codecs*模块提供的方法创建指定编码格式文件
+            . *codecs.open(fname,mode,encoding[,errors,buffering])*
+                eg.
+                    import codecs
+                    f=codecs.open('test.txt','w','utf-8')
+                    f.write(u'中文')
+                    f.close()
+                    print f.encoding        # utf-8
+
+2.linux文件系统
+    .1 文件包括
+        .磁盘（ext2,ext4）文件
+        .NFS文件系统
+        .各种外设（sd卡，USB设备）等
+    .2 同一接口
+        .将所有外设，都同一到虚拟文件系统
+        .通过文件节点访问外设
+        .即linux下所有的控制都是file,通过file的read/write等操作进行修改控制硬件设备
+3.OS模块对文件和目录的操作
+    .1 os模块偏向于linux底层调用
+    .2 os.open(fileName,flag[,mode])        打开文件,返回文件描述
+        .flag    数字，可以|在一起组成不同的打开方式
+            . os.O_CREATE   : 创建文件
+            . os.O_RDONLY   : 只读方式打开
+            . os.O_WRONLY   : 只写方式打开
+            . os.O_RDWR     : 读写方式打开
+    .3 os.read(fd,buffersize)       读取文件
+        .fd 文件描述符
+    .4 os.write(fd,string)          写入文件 ,返回写入文件的大小
+        .fd 文件描述符
+    .5 os.lseek(fd,pos,how)         文件指针操作，返回当前文件位置，int或者long
+        .fd     文件描述符
+        .pos    
+        .how:
+            . os.SEEK_SET   0   : 相对文件起始位置
+            . os.SEEK_CUR   1   : 相对文件当前位置
+            . os.SEEK_END   2   : 相对文件结尾位置
+    .6 os.close(fd)                 关闭文件
+    .7 os模块常用方法介绍
+        . access(path,mode)         判断该文件权限
+            .mode:
+                .os.F_OK                   文件是否存在
+                .os.R_OK                   文件读权限
+                .os.W_OK                   文件写权限
+                .os.X_OK                   文件执行权限
+        . listdir(path)         返回路径下所有文件组成的列表        当前目录 './'
+        . remove(path)          删除文件
+        . rename(old,new)       修改文件或者目录的名字
+        . mkdir(path[,mode])    创建目录
+        . mkdirs(path[,mode])   创建多级目录
+        . removedirs(path)      删除多级目录
+        . rmdir(path)           删除目录（目录必须为空目录）
+    .8 os.path模块
+        . exists(path)          路径(或者文件)是否存在
+        . isdir(path)           是否是一个目录
+        . isfile(path)          是否是文件
+        . getsize(filename)     返回文件大小
+        . dirname(p)            返回文件/路径的目录
+        . basename(p)           返回文件/路径的文件名
+    .9 ini文件操作练习
+        .1 认识init文件
+            .文件格式
+                [session]           节
+                name = value        参数
+                eg.
+                    [port]
+                        port1=8000
+                        port2=8002
+        .2 ConfigParse:ini文件解析器
+            .导入ConfigParse模块
+            .创建一个ConfigParse对象
+                cfg=ConfigParse.ConfigParse()
+            .cfg.read(self,filename)
+                cfg.read('init.txt')
+            .cfg.readfp()
+            .cfg.sections()      返回所有session的name
+            .cfg.items(self,section)        返回对应section的所有项
+            .cfg.set(section,key,value)     设置某节的键值对. 修改或者插入项
+            .cfg.add_section()              添加节
+            .cfg.remove_section(string)     删除某一节
+            .cfg.remove_option(section,key)  删除节中的某个键值对
+            .保存
+                fp=ope('filename.txt','w')
+                cfg.write(fp)       # 将cfg中的内容写入到文件中
+                fp.close()
+4.其他
+    . 对于.py文件，__name__=='__main__' 的意思是？
+                
+

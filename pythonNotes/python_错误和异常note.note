@@ -1,0 +1,105 @@
+python错误和异常处理
+0.大纲
+    .1 常见异常
+    .2 异常处理
+        . try...except以及else使用
+        . try...except截获异常
+        . try...finaly使用
+        . 异常处理综合使用
+    . with..as语句与上下文管理
+    . 标准异常和自定义异常
+    . raise和assert语句
+1.常见异常
+    .NameError          没有定义变量，直接使用
+    .SyntaxError        语法错误
+    .IOError            打开了不存在的文件
+    .ZeroDivisionError  除零错误
+    .ValueError         强转类型错误
+    .KeyboardInterrupt  键盘终端错误，停止当前运行的程序
+
+2.异常处理
+    .try..except格式
+        try:
+            xxx
+        except[ Exception[,e]] :     # Exception是异常的基类，可以捕获某一种的，例如NmaError; e保存了错误的类型,可以有可以没有
+            yyy
+    .try..except捕获多个异常格式
+        try:
+            xxx
+        except Exception1[,e]:
+            yyy
+        except Exception2[,e]:
+            yyy
+        except ExceptionN[,e]:
+            yyy
+    .try..except..else:
+        try:
+            xxx
+        except [Exception[,e]]:
+            yyy
+        else:               # 如果try没有捕获到异常，执行这里
+            zzz
+    .try..[except..]finally:
+        try:
+            xxx
+        [except [Exception[,e]]:
+            yyy
+        ]
+        finally:               # 最终执行. 先执行finally在抛到python解释器
+            zzz
+    .try...except..else...finally 组合使用
+
+3.with语句
+    .格式
+        with context [as var]
+            with_suite
+        .如果有as var会将context返回的对象赋值给var,之后的语句可以使用var
+    .作用：
+        .with语句代替try..except..finally语句，使代码更加简洁
+        .context表达式返回的是一个对象
+        .var用来保存context返回对象。单个返回值或者元组
+        .with_suite可以使用var变量来对context返回对象进行操作
+        .不会处理context发生的异常
+    .例子
+        try:
+            with open('1.txt') as f:
+                for line in f.readlines():
+                    print line
+            print f.closed          # 返回 True
+        except Exception,e:
+            print 'has except',e
+        with中的代码执行完成后，自动关闭了文件
+    .*上下文管理*
+        .上下文管理协议：
+            包含方法__enter__()和__exit__(),支持该协议的对象要实现这两个方法
+        .上下文管理器:
+            定义执行with语句时，要家里的运行时上下文，负责执行with语句块上下文中的进入与退出操作
+        .with语句实质上是上下文管理
+            一旦出现异常，with语句会退出，执行上下文管理器的__exit__()方法，再抛出异常
+    .with语句应用场景
+        .文件操作
+        .进程之间的互斥对象
+        .支持上下文的其他对象
+
+4.raise和assert语句
+    .raise语句，主动抛出异常
+        .语法格式    
+            raise [exception[,args]]
+                exception:      异常类
+                args：          描述异常信息的元组
+    .assert语句，断言。用于检测表达式是否为真。如果为假，引发*AssertionError*
+        .格式
+            assert expression[,args]
+            .expression     表达式
+            .args           判断条件的描述信息
+
+5.python标准异常和自定义异常
+    .1 标准异常
+        build-in 异常
+                                                BaseException
+                               ↓                     ↓                      ↓
+                        KeyboardInterrupt        Exception               SystemExit
+                        用户中断(ctrl+c)        常见异常基类            python解释器退出
+    .2 自定义异常
+        .继承Exception类
+

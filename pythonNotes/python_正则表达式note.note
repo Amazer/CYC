@@ -1,0 +1,82 @@
+Python正则表达式
+1.re模块
+    . import re
+    .1 匹配流程
+        生成一个pattern -->  匹配 ---> 结果
+        re.compile()         Match      match的方法调用
+        . pattern=re.compile(expression[,re.I]) 返回一个匹配的模式
+            . re.I 表示忽略大小写
+            pattern=re.compile(r'expression')
+            .r 表示原样匹配,否则需要转义
+        . match=pattern.match(str1) 如果有匹配，返回一个match对象，否和，返回None
+        . match.group()     将匹配的结果放到字符串或者元组
+        . match.groups()    以组的形式返回
+        . match.span()      返回匹配结果的位置
+        . match.string      匹配的字符串
+        . match.re          匹配的pattern
+    .2 另外一种匹配方式,直接调用
+        re.match(pattern,string,flags=0)    返回一个Match对象
+2.正则表达式语法
+    . 字符匹配
+        字符                    匹配
+        .                       任意一个字符（除了\n）
+        [...]                   匹配字符集(-表示范围)
+                                eg.[abc] [a-c]
+        \d                      匹配一个数字
+        \D                      匹配非数字
+        \s                      匹配一个空白
+        \S                      匹配非空白
+        \w                      匹配一个单词字符
+        \W                      匹配一个非单词字符
+    . 数量
+        字符                    匹配
+        *                       0次或无限次
+        +                       1次或无限次
+        ?                       0次或1次
+        {m}                     m次
+        {m,n}                   m到n次
+        *? /+? /??              非贪婪匹配（匹配尽量少的字符）
+    . 边界匹配
+        字符                    匹配
+        ^                       字符串的开头
+        $                       字符串的结尾
+        \A                      指定的字符串必须出现在开头
+                                eg. '\Acyc'   必须是以cyc开头的字符串
+        \Z                      指定的字符串必须出现在结尾
+                                eg. 'cyc\Z'    必须是以cyc结尾的字符串
+    . 分组匹配
+        字符                    匹配
+        |                       或.匹配左右任意一个表达式
+        (expression)            括号中的表达式作为一个分组
+        \num                    引用编号为num的分组匹配到的字符串.编号从1开始
+                                注意，必须是匹配到的字符串，不是同样的pattern
+                                eg.<book>python</book>
+                                ma=re.math(r'<([\w]+>)[\w]+</*\1*','<book>python</book>') 
+        (?P<name>)              分组起一个别名
+                                eg.r'(>P<mark>[\d]+)' 给分组起了叫做mark的名字
+        (?P=name)               引用别名为name的分组匹配字符串
+                                eg.r'(>P<mark>[\d]+)(?P=mark)' 给分组起了叫做mark的名字,并且又引用了叫做mark分组匹配返回的字符串
+
+3.re模块其他方法
+    . search(pattern,string,flags=0)
+        .在一个字符串中查找匹配
+    . findall(pattern,string,flags=0)
+        .在字符串中查找匹配，并返回所有匹配部分的列表
+    . sub(pattern,repl,stirng,count=0,flags=0)  返回match对象
+        .将字符串中满足匹配的替换为其他值
+        .repl   字符串或者函数(会将match对象作为函数的参数)
+        .count  替换次数的限制
+            eg. str1='videonum=1000'
+            def add1(match):
+                val=match.group()
+                num=int(val)
+                return str(num+1)
+            ma=re.sub(r'\d+',add1,str1)
+    . split(pattern,string,maxsplit=0,flags=0)  返回字符串组成的列表
+        .根据匹配分割字符串，返回分割字符串组成的列表
+        .pattern 是分割符的pattern
+            eg.str1='imooc:c c++ java python'
+                re.split(r':| ',str1)
+                结果是：
+                ['imooc','c','c++','java','python']
+

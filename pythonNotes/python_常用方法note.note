@@ -1,0 +1,10 @@
+1.字符编码
+    unicode.encode(string,'utf-8')
+    string.encode('gbk')
+    在console中显示中文，需要将字符串encode成'gbk'
+2.python文件头，标识使用utf-8编码
+    # -*- coding:utf-8 -*-
+3.random模块中随机数
+4.python语句换行用 \
+    eg. if line.startWith("xxx") \
+    and line.endsWith("yyy")
