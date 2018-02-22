@@ -164,8 +164,8 @@
         .0 有序集合：list,tuple,str,unicode
         .1 无序集合：set
         .2 无序集合并且具有key-value对：dict
-    .1 python中，迭代永远是取出元素本身，而不是指向元素的索引
-    .2 enumerate() 函数获取元素的index和name
+    .1 python中，迭代永远是*取出*元素本身，而不是指向元素的索引
+    .2 *enumerate()* 函数获取元素的index和name
         eg. for index,name in enumerate(L):
         index和name接收了索引和value
         实际上，enumerate()函数把元素转换成了一个tuple返回。即：
