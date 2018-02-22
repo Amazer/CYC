@@ -2,18 +2,53 @@
     . 字符匹配
         字符                    匹配
         .                       任意一个字符（除了\n）
+        \_.                     任意一个字符或者是行结束符(包含\n)
         [...]                   匹配字符集(-表示范围)
                                 eg.[abc] [a-c]
         [^...]                  匹配非方括号中的任意字符
+        \i                      identifier character ('isident')
+        \I                      除了数字之外的\i
+        \k                      keyword character   ('iskeyword')
+        \K                      除了数字之外的\K
+        \f                      文件名字符('isfname')
+        \F                      除了数字之外的文件名字符
         \d                      匹配一个数字
         \D                      匹配非数字
         \x                      匹配十六进制数字等同于[0-9A-Fa-f]
         \X                      匹配非十六进制志伟的任意字符，等同于[^0-9A-Fa-f]
+        \o                      八进制数字
+        \O                      非八进制数字
         \s                      匹配一个空白
         \S                      匹配非空白
         \w                      匹配一个单词字符
         \W                      匹配一个非单词字符
+        \h                      单词的第一个字符[A-Za-z]
+        \H                      非单词字符[^A-Za-z_]
+        \a                      alphabetic character [A-Za-z]
+        \A                      non-alphabetic character [^A-Za-z]
+        \l                      小写字符 [a-z]
+        \L                      非小写字符 [^a-z]
+        \u                      大写字符 [A-Z]
+        \U                      非大写字符 [^A-Z]
+
         \t                      匹配<TAB>字符
+        \e                      <ESC>
+        \r                      <CR>
+        \b                      <BS>
+        \n
+        ~                       最后一个替换字符串
+
+        \c                      忽略大小写
+        \C                      匹配大小写
+        \Z                      
+
+        \%d                     匹配指定的十进制数 
+                                eg. \%d123 匹配123
+        \%x
+        \%o
+        \%u
+        \%U
+        \%C
 
     . 数量
         字符                    匹配
@@ -22,17 +57,80 @@
         ?                       0次或1次
         {m}                     m次
         {m,n}                   m到n次
-        *? /+? /??              非贪婪匹配（匹配尽量少的字符）
+        {n,}                    至少n次
+        {,m}                    0-m
+        {}                      0次或者多次
+        -                       非贪婪匹配（匹配尽量少的字符）
+        {-n,m}                  n-m,as few as possible
+        {-n}                    n次
+        {-n,}                   至少n次,as few as possible
+        {-,m}                   0-m次，as few as possible
+        {-}                     0次或者多次，as few as possible
+
     . 边界匹配
         字符                    匹配
         ^                       字符串的开头
         $                       字符串的结尾
-        \A                      指定的字符串必须出现在开头
-                                eg. '\Acyc'   必须是以cyc开头的字符串
-        \Z                      指定的字符串必须出现在结尾
-                                eg. 'cyc\Z'    必须是以cyc结尾的字符串
+        %                       当前文件
+        %^                      当前文件的开头
+        %$                      当前文件的结尾
+        %#                      当前光标所在位置
+        %'m                     m标记的位置
+        %<'m                    m标记之前的位置
+        %>'m                    m标记之后的位置
+        %231                    匹配指定行（231行）
+        \<                      单词词首
+        \>                      单词词尾
+        \zs                      指定的字符串必须出现在开头
+                                eg. '\zscyc'   必须是以cyc开头的字符串
+        \ze                      指定的字符串必须出现在结尾
+                                eg. 'cyc\ze'    必须是以cyc结尾的字符串
     . 分组匹配
         字符                    匹配
         |                       或.匹配左右任意一个表达式
         (expression)            括号中的表达式作为一个分组
         \num                    引用编号为num的分组匹配到的字符串.编号从1开始
+    . zero-with
+        字符                    描述
+        @>                      (pattern)@> 匹配pattern前面的
+
+        @=                      匹配某个匹配中的特定匹配 pattern1(pattern2)@=
+                                eg.foo(bar)@=  匹配 foobar中的foo
+                                eg.[0-9]+([a-z]+)@= 匹配数字接字模式中的数字 000abc
+
+        @!                      匹配匹配pattern1不匹配pattern2中的pattern1
+                                eg.[0-9]+([a-z]+)@!
+
+        @<=                     匹配pattern后面的 (pattern)@<= 
+                                eg.(an\_s+)@<=file  an file an 匹配了第一个an后面的file
+                                eg.(an\_s+)@<=      an file an 匹配了第一个an后面的f
+        @<!                     匹配 非pattern (pattern)@<!
+        \<                      word的开始
+        \>                      word的结束
+    . vim文件操作
+        字符                    描述
+        .                       当前位置
+        %l                      匹配指定行 eg. %123  在当前文件的123行
+        %<l                     指定行的上面
+        %>l                     指定行的下面
+                                eg. :exe '/\%' . line(".") . 'l.*'
+
+        %c                      指定列. eg. %23c 23列
+        %<c                     %<23c
+        %>c
+		                        eg.:exe '/\%' . col(".") . 'c'
+        
+        %v                      指定的virtual列 %23v
+        %<v
+        %>v
+2.匹配命令和函数
+    .1 :mat[ch] {group} /{pattern}/
+        定义一个模式，并且在当前窗口中高亮。如果有定义group，会按照group的设置高亮
+        eg.
+            " 定义一个组，
+			:highlight MyGroup ctermbg=green guibg=green
+            " 匹配结果按照MyGroup的设置显示
+			:match MyGroup /TODO/
+        :mat[ch]  清除之前的定义的模式
+    .2 :2mat[ch] {group} /{pattern}/
+    .3 :3mat[ch] {group} /{pattern}/
