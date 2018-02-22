@@ -1,0 +1,273 @@
+<<vim基础>>
+:h variables
+eval.txt
+0.大纲
+    .1 vim变量和数据类型
+        .vim中的数据类型
+        .vim中的echo语句
+        .vim中的注释
+        .变量
+        .字符串
+        .多行字符串
+        .Unicode字符串
+        .整数和浮点数
+        .布尔类型
+    .2 vim中的集合类型（list,tuple）
+        .list
+            .创建list
+            .访问list
+            .list的增删改查
+            .list中元素的替换
+        .tuple
+            .创建tuple
+            .tuple相关的属性
+    .3 vim中的条件判断和循环
+        .if语句:if,if-else,if-elseif-else
+        .for语句:for,or foreach
+        .while语句
+        .break语句
+        .continue语句
+        .多重循环
+    .4 dict和set类型
+        .dict
+            .dict的创建
+            .dict的访问
+            .dict的增删改查
+            .dict的遍历
+        .set
+            .set的创建
+            .set的访问
+            .set的特点
+            .set的增删改查
+            .set的遍历
+    .5 函数
+        .函数的调用
+        .函数的定义
+        .函数的返回值
+        .递归函数
+        .函数参数：默认参数、可变参数
+    .6 切片
+        .list切片
+        .倒序切片
+        .字符串切片
+    .7 迭代
+        .索引迭代
+        .dict中的values和keys迭代
+    .8 列表生成式
+        .生成列表
+        .复杂表达式
+        .条件过滤
+        .多层表达式
+
+1.vim变量和数据类型
+    1.1 变量
+        let 关键字定义变量
+        eg. let list=[]
+    1.2 数据类型
+        . Number
+            字符串和数字可以自动转换。转换依赖于怎么使用
+            字符串转数字的时候，只去其中为数字的部分，不是数字的部分会被忽略.没有数字会转为0
+        . Float
+        . String
+            双引号括起来或者单引号括起来
+            "xxx" 'xxx'
+            .'string' 单引号表示：
+                string是什么就是什么样。反斜杠不会转义.
+                常用于正则表达式中的模式表示
+            ."string" 双引号表示:
+                string中的特殊字符需要转义
+            .字符串连接用"."
+                echo 'abc'.'bac'
+        . List
+            方括号表示
+            .可以嵌套使用
+                let list=[1,2,['a','b']]
+                
+        . Dictionary
+            大括号表示，keyValuePair用冒号隔开
+            {key:value,key:value}
+        . 布尔值
+            false
+            true
+            none
+            null
+        . 函数ref Funcref
+        . Job
+        . Channel
+2.list和dict
+    2.1 list
+        2.1.1 创建列表
+            方括号表示
+            .可以嵌套使用
+                let list=[1,2,['a','b']]
+        2.1.2 访问列表
+            .索引
+                .从0开始
+                    let item=list[0]    (1)
+                .倒序访问 索引为负时，表示倒数第几个
+                    let item=list[-1]   (['a','b'])
+            .get()函数获取元素。如果没有值，返回0或者指定的值
+                get(list,index)
+                eg. get(mylist,idx)
+                    get(mylist,idx,"NONE")
+        2.1.3 修改列表
+            .list连接
+                .使用+可以连接两个列表
+                    eg. let longlist=list+[5,6]
+            .修改list
+                .修改list元素:使用*let*关键字
+                    let list[0]='c'
+                .修改多个list元素list[sIndex,eIndex]
+                    let list[0:2]=[8,9,10]
+            .插入元素 insert(list,element[,index])
+                .列表末尾添加:      call insert(list,'a')
+                .指定index添加:     call insert(list,'a',3)
+            .添加元素 add(list,element)
+                .add函数可以添加list也可以添加string
+                call add(list,'b')
+                call add(list,[1,2])
+            .添加元素：扩展列表 extend(list,itemlist)
+                .extend函数将itemlist中的每个元素添加进列表
+                call add(list,[4,5])
+                等同于 let list=list+[4]+[5]
+            .删除元素
+                .remove(list,index),返回被删除的元素
+                .unlet list[index],不返回任何
+                .remove(list,startIndex,endIndex) 删除startIndex到endIndex的元素,返回被删除的元素列表
+                    eg. let l=remove(list,3,-1) 从Index=3的元素删除直到最后
+                .unlet list[3:] 删除Index=3之后的所有元素
+                .filter(list,expression) 删除列表中满足表达式的元素
+            .改变列表中的顺序
+                .sort(list)         按照字母排序列表
+                .reverse(list)      倒序排列列表
+                .uniq(list)         删除列表中重复的元素
+        2.1.4 列表切片(子列表),返回子列表 list[s:e]
+            s和e可以省略
+            .1 list[2:]     从index=2到最后
+            .2 list[2:4]    从index=4到index=4
+            .3 list[:]
+            .4 list[:2]
+        2.1.5 复制列表 
+            1.copy()方法。获得了列表中*元素的指针*。改变旧列表中元素的值，新列表中的这个值也会改变
+                let lcopy=copy(list)
+            2.deepcopy()方法。*递归复制*列表中的元素
+        2.1.6 列表相等
+            1.如果列表中的元素相等，则列表相等
+            2.is  isnot 列表引用是否相同
+                .is 两个列表是否引用同一个list
+                .isnot 两个列表不引用同一个list
+        2.1.7 列表解包 unpack
+            . 将列表中的元素获取出来
+            . 如果var的数量和list元素的数量不一致，会报错,所以使用rest,接收之后的元素，如果没有，reset为[]
+                let [var1,var2;rest]=mylist
+                等同于
+                let var1=mylist[0]
+                let var2=mylist[1]
+                let rest=mylist[2:]
+        2.1.8 列表常用方法
+            .1 let r=call(funcName,list)
+                [Q]:对列表做func操作（list是参数？还是说对list中的每一个元素做操作？）
+            .2 if *empty*(list)             判断列表是否为空
+            .3 let l=*len*(list)            获取列表长度
+            .4 let big=*max*(list)          获取列表中最大的值
+            .5 let small=*min*(list)        获取列表中最小的值
+            .6 let xs=*count*(list,'x')     得到列表中'x'出现的次数
+            .7 let i=*index*(list,'x')      获取列表中第一个'x'的index
+            .8 let lines=*getline*(1,10)    从buffer中获取line num从1到10的字符串，组成列表
+            .9 call *append*('$',lines)     将lines添加到当前buffer末尾
+            .10 let list=*split*("a b c")   将字符串分割成列表
+                    split(string[,'x'])     默认分隔符是空格，可以指定分隔符
+            .11 let string=*join*(list,',') 将list的元素连接起来
+                :exe 'let sum= ' . join(list,'+')      将list中的所有元素加起来
+                join操作将得到 a+b+c..的字符串，在用exe 'expression'执行
+            .12 let s=*string*(list)        将列表的字符串
+            .13 call *map*(list,'">>".v:val') 在每个元素前添加">>"
+                map(list,expression)  对list中的每一个元素做表达式的操作
+    2.2 dict字典
+        0. 花括号表示，键值对用:隔开
+            key永远都是string.如果使用了数字，也会自动转成string的
+            如果是数字的话，也可以把数字作为key(其实是自动转换了)
+        1.创建字典
+            let mydict={1:'one',2:'two',3:'three'}
+            let emptydict={}
+            let nestdict = {1: {11: 'a', 12: 'b'}, 2: {21: 'c'}}
+            如果最后有逗号，逗号会被忽略
+        2.访问字典
+            .1 根据key
+                let val=mydict['1']
+                let mydict['4']='four'
+            .2 字典的keys可以直接当成字典的属性访问
+                let val=mydict.one
+                let mydict.four=4
+                let mydict.4='four'
+        3.遍历字典
+            .1 遍历字典需要把字典转成列表:for
+            .2 *keys()*获取字典的所有关键字
+                for key in keys(mydict)
+                    echo key.':'.mydict[key]
+                endfor
+            .3 *values()*获取字典所有的值
+                for v in values(mydict)
+                    echo 'value:'.v
+                endfor
+            .4 *items()*获取字典的键值对. 键值对是一个列表
+                for [key,value] in items(mydict)
+                    echo key.':'.value
+                endfor
+        4.字典的唯一性
+            和list一样，使用copy()和deepcopy()获得一个新dict
+            和list一样，键值对相同的dict==是1
+            is 是判断的地址
+            isnot 两个地址不一样
+        5.修改字典
+            .1 修改
+                let dict.4='four'
+                let dict['one']=item
+            .2 删除 remove() unlet
+                let i=remove(dict,'aaa')    返回value
+                unlet dict.aaa
+                unlet dict['aaa']
+            .3 合并字典 extend()
+                call extend(aDic,bDic)
+                将bDic合并到aDic.如果key相同，aDict值会被覆盖
+            .4 删除满足条件的项 filter(dict,expression)
+                call filter(dict,'v:val=~"x"')
+                移除所有dict中val中没有"x"的项
+        6.字典相关的函数
+            .1 字典函数：函数有dict属性的时候，这个函数可以被用在字典的定义里面
+                function! Mylen() dict
+                    return len(self.data)
+                endfunction
+                let mydict={'data':[0,1,2,3],'len':function("Mylen")}
+                echo mydict.len()
+                字典中的len的定义是一个方法。类似于高阶函数,是一个Funcref，将函数名作为参数。
+                而self就代表的是mydict这个字典
+                note: Funcref就是function('funcName')函数返回funcNmae函数的指针，可以直接调用
+                    eg. let Fn=function('MyFunc')
+                        echo Fn()       # 调用了Fn,和调用MyFunc()一样
+            .2 数字函数、匿名函数
+
+
+3.循环
+    1.for循环
+        0.迭代遍历(c#中的foreach)
+        1.*for*...*endfor*
+            *for* item in mylist
+                call Doit(item)
+            *endfor*
+        2.获取
+            for [i,j;rest] in mylist
+                call Doit(i,j)
+                if !empty(rest)
+                    echo 'remainder:'.string(rest)
+                endif
+            enfor
+    2.while循环:*while* ... *endwhile*
+        let index=0
+        while index<len(mylist)
+            let item=mylist[index]
+            call Doit(item)
+            let index=index+1
+        endwhile
+        
+      
