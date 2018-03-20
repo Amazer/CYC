@@ -1,5 +1,6 @@
 <<vim基础>>
 :h variables
+Ctrl-] to jump to full explanation in vim's help doc
 eval.txt
 0.大纲
     .1 vim变量和数据类型
@@ -18,9 +19,9 @@ eval.txt
             .访问list
             .list的增删改查
             .list中元素的替换
-        .tuple
-            .创建tuple
-            .tuple相关的属性
+        .dict
+            .创建dict
+            .dict相关的属性
     .3 vim中的条件判断和循环
         .if语句:if,if-else,if-elseif-else
         .for语句:for,or foreach
@@ -245,10 +246,104 @@ eval.txt
                 note: Funcref就是function('funcName')函数返回funcNmae函数的指针，可以直接调用
                     eg. let Fn=function('MyFunc')
                         echo Fn()       # 调用了Fn,和调用MyFunc()一样
-            .2 数字函数、匿名函数
+            .2 数字函数、匿名函数(*Funcref*)
+                .1 定义字典函数
+                    .字典添加新keyValuePair的时候，可以直接当成函数添加
+                    .字典函数中的self就是字典本身，可以调用已有的kvp
+                    let mydict={'data':[0,1,2,3]}
+                    function mydict.len()
+                        return len(*self*.data)
+                    endfunction
+                    echo mydict.len()
+            .3 字典相关的函数
+                . if *has_key*(dict,'foo')
+                    查找是否包含key
+                . if *empty*(dict)
+                    字典是否为空
+                . let l=*len*(dict)
+                    字典长度
+                . let big=*max*(dict)
+                    字典中，value最大的
+                . let small=*min*(dict)
+                    字典中,value最小的
+                . let xs=*count*(dict,'x')
+                    字典的values中出现'x'的次数
+                . let s=*string*(dict)
+                    字典变的格式以string形式
+                . call map(dict,'">>".v:val')
+                    在所有项的value前面加">>"
+3.更多变量类型
+    1. *type()*函数获取变量的类型
+        使用*v:t_* variable that has the value:
+        Number:	    0  |v:t_number|
+        String:	    1  |v:t_string|
+        Funcref:    2  |v:t_func|
+        List:	    3  |v:t_list|
+        Dictionary: 4  |v:t_dict|
+        Float:	    5  |v:t_float|
+        Boolean:    6  |v:t_bool| (v:false and v:true)
+        None	    7  |v:t_none| (v:null and v:none)
+        Job	        8  |v:t_job|
+        Channel	    9  |v:t_channel|
+            .echo v:t_xxxx  会打印出数字
+        .使用type()示例：
+            if type(myvar) == type(0)
+            if type(myvar) == type(v:false)
+        .使用v:t_ 变量示例:
+            if exists('v:t_number')
+    2. 'viminfo'选项中，当使用'*!*'的时候，*全局变量*必须*全部大写*
+    3. 'sessionoptions'选项包含'global'的时候，全局变量首字母大写，并且必须有小写字母
+        举例：
+            变量名                  可以被存储在哪里
+            my_var_6                不能被存储在文件中
+            My_Var_6                可以被存储在session文件中
+            MY_VAR_6                可以被存储在viminfo文件中
+4.表达式语法
+    1. expr1 ? expr2 : expr3        if-then-else
+        echo lnum!=3 ? 'not 3' : lnum
+    2. 逻辑或 || 
+    3. 逻辑与 &&
+    4. 比较 expr5 {cmp} expr5
+        . ==                equal
+        . !=                not equal
+        . >
+        . >=
+        . <
+        . <=
+        . =~                正则表达式匹配
+        . !~                正则表达式不匹配
+        . ==?               相等，忽略大小写
+        . ==#               相等，匹配大小写
+        . is
+        . isnot
+    5. 操作符
+        . +                 数字加，或者List的连接
+        . -                 数字减
+        . .                 字符串连接
+    6. 操作符2
+        . *                 数字乘
+        . /                 数字除
+        . %                 数字取余
+    7. 操作符3
+        . !                 逻辑非
+        . -                 负号
+        . +                 正号
+    8.其他
+        . &option           选项值,优先获取本地值
+        . &g:option         全局选项值
+        . &l:option         本地选项值
+        . varialbes         build-in 变量
+        . &VAR              环境变量
+        . @r                寄存器r中的内容
+        . function(expr1,...)       函数调用
+        . func{ti}on(expr1,...)     用花括号函数调用
+        . {args -> expr1}           lambda表达式(操作符前后都需要有一个空格)
+            eg. let F={arg1,arg2 -> arg1 - arg2}      参数函数
+                echo F(5,2)
+                let F={-> 'error function'}          无参函数(->\s 需要一个空格)
+                echo F()
 
-
-3.循环
+4.循环
     1.for循环
         0.迭代遍历(c#中的foreach)
         1.*for*...*endfor*
@@ -269,5 +364,76 @@ eval.txt
             call Doit(item)
             let index=index+1
         endwhile
+5.函数的闭包(:func-closure)
+    . 支持闭包
+    . sort() map() filter()
+6.内置方法 Builtin Functions  (See function-list)
+7.函数的使用
+    .函数可以执行一系列的 Ex commands (命令)
+    .在Normal模式中执行命令可以使用 :normal command
+    .函数名字必须以*大写字母开头*，为了避免和内置函数混淆
+    .一个良好的命名函数习惯是，以脚本的名字开头命名函数
+    .可以使用curly braces ,参见 curly-braces-names
+    .autoload在定义只有在调用的时候才生成的函数非常有用
+    .脚本范围的函数定义时，必须以"*s:*"开头,脚本内函数必须在脚本内被调用
+    .如果脚本范围内的函数从非此脚本的mapping中调用，必须用*<SID>*代替"s:"开头来调用
+    .只有script-local函数，没有buffer-local或者window-local的函数
+    . 内置命令
+        . :fu[nction]               列出所有的函数和参数
+        . :fu[nction] {name}        列出{name}函数
+        . :fu[nction] /{pattern}    列出函数名满足匹配的函数
+        . :fu[nction][!]{name}([argument]) [range] [abort] [dict] [closure]
         
-      
+<<变量作用域与预定义变量>> 
+1.内部变量
+    1.变量的创建和销毁
+        .1 用:let 创建
+        .2 用:unlet 销毁变量(变量就未定义了)
+    2.变量作用域
+        . buffer-variable   b:          当前buffer的本地变量
+        . window-variable   w:          当前window的本地变量
+        . tabpage-variable  t:          当前tap页的本地本地变量
+        . global-variable   g:          全局变量
+        . local-variable    l:          函数的局部变量
+        . script-variable   s:          :source当前脚本的作用域变量
+        . function-argument a:          函数的参数变量(只能在函数内部使用)
+        . vim-variable      v:          全局变量，vim预定义的变量
+2.buffer相关的预定义变量    b:var
+    . :bdelete  删除buffer的时候，相关的变量也会被销毁
+    . b:changedtick         buffer的修改次数
+3.全局变量  v:var
+    . 'balloonexpr'开启时有效的...
+        . :v:beval_col      当前鼠标所在的列    
+        . :v:beval_lnum     当前鼠标所在的行    
+        . :v:veval_bufnr    buffer的数量
+    . 其他有用
+        . :v:version
+        . :v:warningmsg     上一次的警告信息
+        . :v:windowid       winnr() win_getid()   :h window-ID
+
+4.&option
+    . &number           获取当前buffer的id
+    . &list
+    . &shell            当前系统的shell文件
+5.tabpage
+    .&tabstop
+6.模式
+    .&insertmode
+<<当前buffer相关>>
+1.位置
+    . getline(".")          获取当前位置的内容  可以为"."，也可以为行号
+    . col(".")              获取当前列列号
+    . line(".")             获取当前行行号
+<<Options选项>>
+1.选项：:h options
+2.函数
+    . has('xx')             有什么功能
+    . execute('xxx')        执行命令
+    . exists('argsName')    是否存在变量
+    . getchar()             获取屏幕上的字符
+    . json_encode()
+    . winnr()               获取当前窗口在vim中的id
+    . win_getid()           获取窗口id
+
+<<其他>>
+1.多行代码，用 \
