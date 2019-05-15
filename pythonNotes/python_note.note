@@ -138,7 +138,14 @@
     .5 支持定义默认参数，和c#一样
     .6 定义可变参数 *args
         可变参数前有个*号，可以传入0个或多个
-        原理:将多个参数组装成一个tuple,在函数内部，直接把args当成tuple使用就可以了
+        原理:将多个参数组装成一个tuple,在函数内部，直接把*args*当成*tuple*使用就可以了
+    .7 定义默认赋值的参数，使用***kwargs*,接收到的kwargs当做*字典*使用。
+        .eg 
+            def target(**kwargs):
+                for kvp in kwargs:
+                    print "kvp:"+kvp
+            target(arg1="value1",arg2=123)
+    .8 python 27版本中，变长参数只能放到最后，3.x版本变长参数可以放到前面
 
 12.list和tuple的切片":"
     .0 L[0:3]  取L中的第0个到第三个元素,可以省略开头和结尾.
