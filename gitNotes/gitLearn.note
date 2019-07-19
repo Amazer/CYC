@@ -298,3 +298,7 @@
     3.管理权限
     git支持钩子（hook），所以，可以在服务器端编写一系列街霸来控制提交等操作
     Gitolite工具可以达到这个目的。自己查找教程
+21.Git config配置帮助记住密码：
+    在.git/config文件中添加：
+    [credential]
+        helper = true
